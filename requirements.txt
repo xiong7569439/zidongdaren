@@ -1,0 +1,29 @@
+# YouTube网红曝光合作系统 - Python依赖
+
+# Web框架
+flask>=3.0.0
+
+# 网络请求
+requests>=2.31.0
+
+# HTML解析
+beautifulsoup4>=4.12.0
+
+# 配置管理
+pyyaml>=6.0.1
+
+# 数据处理
+# pandas>=2.0.0  # 可选，用于高级数据分析
+
+# 邮件发送
+# sendgrid>=6.10.0  # 可选，用于SendGrid邮件服务
+
+# LLM/AI (可选)
+# openai>=1.0.0  # 用于OpenAI API
+# anthropic>=0.8.0  # 用于Claude API
+
+# 开发依赖（可选）
+# pytest>=7.4.0
+# pytest-cov>=4.1.0
+# black>=23.0.0
+# flake8>=6.0.0

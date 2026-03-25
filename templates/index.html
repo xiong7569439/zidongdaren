@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ stats.total_leads }}</div>
+        <div class="stat-label">总线索数</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ stats.by_stage.get('negotiating', 0) + stats.by_stage.get('outreach_sent', 0) }}</div>
+        <div class="stat-label">进行中</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ stats.by_stage.get('closed_won', 0) }}</div>
+        <div class="stat-label">已成交</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ stats.by_stage.get('closed_lost', 0) }}</div>
+        <div class="stat-label">未成交</div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>⚙️ 系统状态</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+        <div style="padding: 1rem; background: #f9fafb; border-radius: 8px;">
+            <strong>YouTube API</strong>
+            <div class="status-indicator" style="margin-top: 0.5rem;">
+                <span class="status-dot {{ 'online' if stats.api_configured else 'offline' }}"></span>
+                <span>{{ '已配置' if stats.api_configured else '未配置' }}</span>
+            </div>
+        </div>
+        <div style="padding: 1rem; background: #f9fafb; border-radius: 8px;">
+            <strong>邮件发送</strong>
+            <div class="status-indicator" style="margin-top: 0.5rem;">
+                <span class="status-dot {{ 'online' if stats.email_configured else 'offline' }}"></span>
+                <span>{{ '已配置' if stats.email_configured else '未配置' }}</span>
+            </div>
+        </div>
+        <div style="padding: 1rem; background: #f9fafb; border-radius: 8px;">
+            <strong>AI/LLM</strong>
+            <div class="status-indicator" style="margin-top: 0.5rem;">
+                <span class="status-dot {{ 'online' if stats.llm_configured else 'offline' }}"></span>
+                <span>{{ '已配置' if stats.llm_configured else '未配置' }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>📊 Pipeline分布</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        {% for stage, count in stats.by_stage.items() %}
+            {% if count > 0 %}
+            <div style="text-align: center; padding: 1rem; background: #f9fafb; border-radius: 8px;">
+                <div style="font-size: 1.5rem; font-weight: 700; color: #667eea;">{{ count }}</div>
+                <div style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">{{ stage }}</div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<div class="card">
+    <h2>🚀 快速操作</h2>
+    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+        <a href="{{ url_for('new_lead') }}" class="btn btn-primary">➕ 创建新线索</a>
+        <a href="{{ url_for('leads') }}" class="btn btn-secondary">📋 查看所有线索</a>
+    </div>
+</div>
+{% endblock %}

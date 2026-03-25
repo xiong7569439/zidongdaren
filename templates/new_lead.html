@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}新建线索 - YouTube网红曝光合作系统{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h2>➕ 创建新线索</h2>
+    
+    <form method="POST" action="{{ url_for('new_lead') }}" style="margin-top: 1.5rem;">
+        <div class="form-group">
+            <label for="channel_url">YouTube频道URL *</label>
+            <input type="url" 
+                   id="channel_url" 
+                   name="channel_url" 
+                   class="form-control" 
+                   placeholder="https://www.youtube.com/@channelname"
+                   required>
+            <small style="color: #666; margin-top: 0.5rem; display: block;">
+                支持格式: https://www.youtube.com/@username 或 https://www.youtube.com/c/channelname
+            </small>
+        </div>
+        
+        <div class="form-group">
+            <label for="creator_name">创作者名称（可选）</label>
+            <input type="text" 
+                   id="creator_name" 
+                   name="creator_name" 
+                   class="form-control" 
+                   placeholder="如果留空，系统将自动获取">
+        </div>
+        
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary">创建线索</button>
+            <a href="{{ url_for('leads') }}" class="btn btn-secondary">取消</a>
+        </div>
+    </form>
+</div>
+
+<div class="card" style="max-width: 600px; margin: 1.5rem auto 0;">
+    <h3>💡 提示</h3>
+    <ul style="margin-top: 1rem; padding-left: 1.5rem; color: #666;">
+        <li>如果配置了YouTube API，创建后会自动执行数据采集</li>
+        <li>创作者名称可以留空，系统会自动从YouTube获取</li>
+        <li>确保URL格式正确，以 https://www.youtube.com/ 开头</li>
+    </ul>
+</div>
+{% endblock %}

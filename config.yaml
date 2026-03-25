@@ -1,0 +1,74 @@
+# YouTube网红曝光合作系统 - 配置文件
+
+# YouTube Data API配置
+# 获取API Key: https://console.cloud.google.com/apis/credentials
+youtube_api:
+  api_key: "AIzaSyBBoEH_pX8F324cJWvgX6KjHymdVWB3TG8"  # 你的YouTube Data API Key
+  enabled: true
+
+# 邮件发送配置
+email:
+  # 模式: mock (模拟) / smtp / sendgrid
+  mode: "mock"
+  
+  # SMTP配置（用于实际发送邮件）
+  smtp:
+    host: "smtp.aliyun.com"  # 或你的SMTP服务器
+    port: 587
+    user: "cooperate@topuplive.com"  # 邮箱地址
+    password: "QGZbF8yG3ELNrC87Jpxu"  # 邮箱密码或应用专用密码
+    use_tls: true
+  
+  # SendGrid配置（可选）
+  sendgrid:
+    api_key: ""
+  
+  # 默认发件人
+  default_from: "cooperate@topuplive.com"
+
+# CRM存储配置
+crm:
+  # 存储类型: json / database / notion
+  storage_type: "json"
+  
+  # JSON文件路径（用于开发/测试）
+  json_file: "data/crm_records.json"
+  
+  # 数据库配置（生产环境）
+  database:
+    connection_string: ""
+  
+  # Notion配置（可选）
+  notion:
+    api_key: ""
+    database_id: ""
+
+# 数据采集配置
+data_collection:
+  # 默认采集视频数量
+  default_video_count: 30
+  
+  # 数据置信度阈值
+  confidence_threshold: "medium"  # low / medium / high
+  
+  # 是否优先使用API
+  prefer_api: true
+
+# 报价配置
+pricing:
+  # 默认CPM范围（USD/千次曝光）
+  default_cpm_range:
+    min: 8
+    max: 25
+  
+  # 预算限制
+  budget_limits:
+    enabled: false
+    min: 100
+    max: 10000
+
+# 日志配置
+logging:
+  level: "INFO"  # DEBUG / INFO / WARNING / ERROR
+  file: "logs/agent.log"
+  console: true

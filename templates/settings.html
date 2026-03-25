@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}设置 - YouTube网红曝光合作系统{% endblock %}
+
+{% block content %}
+<h2>⚙️ 系统设置</h2>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+    <!-- YouTube API -->
+    <div class="card">
+        <h3>📺 YouTube API</h3>
+        <div style="margin-top: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                <span class="status-dot {{ 'online' if config.youtube_api.api_key else 'offline' }}"></span>
+                <span>{{ '已配置' if config.youtube_api.api_key else '未配置' }}</span>
+            </div>
+            {% if config.youtube_api.api_key %}
+            <div style="font-size: 0.9rem; color: #666;">
+                <div>API Key: {{ config.youtube_api.api_key[:15] }}...</div>
+                <div style="margin-top: 0.5rem;">状态: {{ '启用' if config.youtube_api.enabled else '禁用' }}</div>
+            </div>
+            {% else %}
+            <div style="font-size: 0.9rem; color: #666;">
+                <p>请在 config.yaml 中配置 YouTube API Key</p>
+                <p style="margin-top: 0.5rem;">
+                    <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: #667eea;">
+                        获取 API Key →
+                    </a>
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 邮件配置 -->
+    <div class="card">
+        <h3>📧 邮件发送</h3>
+        <div style="margin-top: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                <span class="status-dot {{ 'online' if config.email.smtp.user else 'offline' }}"></span>
+                <span>{{ config.email.mode }}</span>
+            </div>
+            {% if config.email.smtp.user %}
+            <div style="font-size: 0.9rem; color: #666;">
+                <div>SMTP服务器: {{ config.email.smtp.host }}</div>
+                <div style="margin-top: 0.5rem;">发件人: {{ config.email.smtp.user }}</div>
+            </div>
+            {% else %}
+            <div style="font-size: 0.9rem; color: #666;">
+                <p>当前使用模拟模式，邮件不会实际发送</p>
+                <p style="margin-top: 0.5rem;">请在 config.yaml 中配置 SMTP 以启用真实发送</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- LLM配置 -->
+    <div class="card">
+        <h3>🤖 AI/LLM</h3>
+        <div style="margin-top: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                <span class="status-dot {{ 'online' if llm_available else 'offline' }}"></span>
+                <span>{{ '已配置' if llm_available else '未配置' }}</span>
+            </div>
+            {% if llm_available %}
+            <div style="font-size: 0.9rem; color: #666;">
+                <div>提供商: {{ llm_provider }}</div>
+                <div style="margin-top: 0.5rem;">模型: {{ llm_model }}</div>
+            </div>
+            {% else %}
+            <div style="font-size: 0.9rem; color: #666;">
+                <p>配置 LLM 以启用 AI 邮件生成和谈判回复</p>
+                <p style="margin-top: 0.5rem;">支持: DeepSeek, OpenAI, Anthropic Claude, 阿里云百炼</p>
+                <div style="margin-top: 1rem; padding: 1rem; background: #f9fafb; border-radius: 8px;">
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;">环境变量 (推荐DeepSeek):</div>
+                    <code style="font-size: 0.8rem;">LLM_PROVIDER=deepseek</code><br>
+                    <code style="font-size: 0.8rem;">DEEPSEEK_API_KEY=sk-...</code><br>
+                    <code style="font-size: 0.8rem;">LLM_MODEL=deepseek-chat</code>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 1.5rem;">
+    <h3>📄 配置文件</h3>
+    <p style="color: #666; margin-top: 0.5rem;">
+        配置文件路径: <code>config.yaml</code>
+    </p>
+    <p style="color: #666; margin-top: 0.5rem;">
+        环境变量文件: <code>.env</code> (从 .env.example 复制并修改)
+    </p>
+</div>
+
+<div class="card" style="margin-top: 1.5rem;">
+    <h3>🔧 功能说明</h3>
+    <table style="margin-top: 1rem;">
+        <thead>
+            <tr>
+                <th>功能</th>
+                <th>所需配置</th>
+                <th>状态</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>YouTube数据采集</td>
+                <td>YouTube API Key</td>
+                <td>{{ '✅' if config.youtube_api.api_key else '❌' }}</td>
+            </tr>
+            <tr>
+                <td>YouTube创作者搜索</td>
+                <td>YouTube API Key</td>
+                <td>{{ '✅' if config.youtube_api.api_key else '❌' }}</td>
+            </tr>
+            <tr>
+                <td>邮件发送</td>
+                <td>SMTP 或 SendGrid</td>
+                <td>{{ '✅' if config.email.smtp.user else '⚠️ 模拟模式' }}</td>
+            </tr>
+            <tr>
+                <td>AI邮件生成</td>
+                <td>DeepSeek / OpenAI / Anthropic / 阿里云百炼 API Key</td>
+                <td>{{ '✅' if llm_available else '❌' }}</td>
+            </tr>
+            <tr>
+                <td>AI谈判回复</td>
+                <td>DeepSeek / OpenAI / Anthropic / 阿里云百炼 API Key</td>
+                <td>{{ '✅' if llm_available else '❌' }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

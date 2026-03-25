@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+
+{% block title %}线索管理 - YouTube网红曝光合作系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kol-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .kol-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .kol-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    
+    .kol-header {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .kol-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #f3f4f6;
+    }
+    
+    .kol-avatar-placeholder {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .kol-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .kol-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #111;
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .kol-handle {
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+    
+    .kol-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .kol-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .tag-game {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .tag-status {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .tag-lang {
+        background: #fce7f3;
+        color: #9d174d;
+    }
+    
+    .tag-sponsor {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .kol-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: #f9fafb;
+        border-radius: 12px;
+    }
+    
+    .kol-stat {
+        text-align: center;
+    }
+    
+    .kol-stat-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #667eea;
+    }
+    
+    .kol-stat-label {
+        font-size: 0.7rem;
+        color: #666;
+        margin-top: 0.1rem;
+    }
+    
+    .kol-socials {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .social-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .social-youtube {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .social-twitch {
+        background: #f3e8ff;
+        color: #9333ea;
+    }
+    
+    .social-twitter {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+    
+    .social-discord {
+        background: #e0e7ff;
+        color: #4f46e5;
+    }
+    
+    .social-email {
+        background: #d1fae5;
+        color: #059669;
+    }
+    
+    .social-link:hover {
+        transform: scale(1.05);
+    }
+    
+    .kol-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .kol-stage {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .view-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <h2>📋 线索管理</h2>
+    <a href="{{ url_for('new_lead') }}" class="btn btn-primary">➕ 新建线索</a>
+</div>
+
+{% if leads %}
+<div class="kol-grid">
+    {% for lead in leads %}
+    <div class="kol-card">
+        <!-- 头部信息 -->
+        <div class="kol-header">
+            {% if lead.thumbnail %}
+            <img src="{{ lead.thumbnail }}" alt="{{ lead.creator_name }}" class="kol-avatar">
+            {% else %}
+            <div class="kol-avatar-placeholder">{{ lead.creator_name[0] if lead.creator_name else '?' }}</div>
+            {% endif %}
+            <div class="kol-info">
+                <div class="kol-name">{{ lead.creator_name }}</div>
+                <div class="kol-handle">{{ lead.custom_url or lead.channel_url.split('/')[-1] }}</div>
+                <div class="kol-tags">
+                    {% if lead.game_focus %}
+                        {% for game in lead.game_focus[:2] %}
+                        <span class="kol-tag tag-game">{{ game }}</span>
+                        {% endfor %}
+                    {% endif %}
+                    {% if lead.country %}
+                    <span class="kol-tag tag-lang">{{ lead.country }}</span>
+                    {% endif %}
+                    {% if lead.sponsor_status %}
+                    <span class="kol-tag tag-sponsor">{{ lead.sponsor_status }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- 数据统计 -->
+        <div class="kol-stats">
+            <div class="kol-stat">
+                <div class="kol-stat-value">{{ lead.subscriber_display or '-' }}</div>
+                <div class="kol-stat-label">Subscribers</div>
+            </div>
+            <div class="kol-stat">
+                <div class="kol-stat-value">{{ lead.video_count_display or '-' }}</div>
+                <div class="kol-stat-label">Videos</div>
+            </div>
+            <div class="kol-stat">
+                <div class="kol-stat-value">{{ lead.avg_views_display or '-' }}</div>
+                <div class="kol-stat-label">Avg Views</div>
+            </div>
+        </div>
+        
+        <!-- About邮箱快捷显示 -->
+        {% if lead.about_emails %}
+        <div style="margin-top: 0.75rem; padding: 0.5rem; background: #fef3c7; border-radius: 6px; border: 1px solid #f59e0b;">
+            <div style="font-size: 0.75rem; color: #92400e; margin-bottom: 0.25rem; font-weight: 600;">
+                📧 Email found in About:
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                {% for email in lead.about_emails[:2] %}
+                <a href="mailto:{{ email }}" style="font-size: 0.8rem; color: #d97706; text-decoration: none; font-weight: 500;">
+                    {{ email }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- 社交链接 -->
+        {% if lead.social_links %}
+        <div class="kol-socials">
+            {% for link in lead.social_links %}
+            <a href="{{ link.url }}" target="_blank" class="social-link social-{{ link.type }}">
+                {% if link.type == 'youtube' %}▶️
+                {% elif link.type == 'twitch' %}💜
+                {% elif link.type == 'twitter' %}🐦
+                {% elif link.type == 'discord' %}💬
+                {% elif link.type == 'email' %}📧
+                {% else %}🔗
+                {% endif %}
+                {{ link.label }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- 底部信息 -->
+        <div class="kol-footer">
+            <span class="kol-stage">{{ lead.stage_display }}</span>
+            <a href="{{ url_for('lead_detail', channel_url=lead.channel_url) }}" class="btn btn-secondary view-btn">
+                查看详情 →
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card" style="text-align: center; padding: 4rem;">
+    <div style="font-size: 4rem; margin-bottom: 1rem;">📭</div>
+    <h3 style="color: #666; margin-bottom: 0.5rem;">暂无线索</h3>
+    <p style="color: #999; margin-bottom: 1.5rem;">开始添加YouTube创作者，管理你的合作线索</p>
+    <a href="{{ url_for('new_lead') }}" class="btn btn-primary">
+        创建第一个线索
+    </a>
+</div>
+{% endif %}
+{% endblock %}
