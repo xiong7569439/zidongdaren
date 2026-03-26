@@ -62,7 +62,7 @@ email_password = os.getenv("EMAIL_PASSWORD")
 email_smtp_host = os.getenv("EMAIL_SMTP_HOST")
 email_smtp_port = int(os.getenv("EMAIL_SMTP_PORT", "587"))
 
-if email_sender and email_password:
+if email_sender and email_password and email_smtp_host:
     # 使用环境变量配置的邮箱
     email_tool = EmailTool(
         smtp_host=email_smtp_host,
