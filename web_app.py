@@ -63,6 +63,10 @@ email_smtp_host = os.getenv("EMAIL_SMTP_HOST")
 email_smtp_port = int(os.getenv("EMAIL_SMTP_PORT", "587"))
 sendgrid_api_key = os.getenv("SENDGRID_API_KEY")
 
+# 调试日志
+print(f"[Email Config] SENDGRID_API_KEY: {'已设置' if sendgrid_api_key else '未设置'}")
+print(f"[Email Config] EMAIL_SENDER: {email_sender or '未设置'}")
+
 if sendgrid_api_key and email_sender:
     # 优先使用 SendGrid（避免Railway端口限制）
     email_tool = EmailTool(
