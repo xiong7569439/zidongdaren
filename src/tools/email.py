@@ -287,9 +287,17 @@ class EmailTool:
             }
             
         except requests.exceptions.RequestException as e:
+            error_msg = f"SendGrid API错误: {str(e)}"
+            if hasattr(e, 'response') and e.response is not None:
+                try:
+                    error_detail = e.response.json()
+                    error_msg = f"SendGrid API错误: {error_detail}"
+                except:
+                    error_msg = f"SendGrid API错误: {e.response.text}"
+            print(f"[SendGrid Error] {error_msg}")
             return {
                 "status": "error",
-                "error": f"SendGrid API错误: {str(e)}",
+                "error": error_msg,
                 "error_type": "sendgrid_error"
             }
     
