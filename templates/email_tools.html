@@ -1,0 +1,894 @@
+{% extends "base.html" %}
+
+{% block title %}邮件工具 - YouTube网红曝光合作系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .email-template-section {
+        margin-bottom: 2rem;
+    }
+
+    .template-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border-left: 4px solid #667eea;
+    }
+
+    .template-card.follow-up {
+        border-left-color: #f59e0b;
+    }
+
+    .template-card.negotiation {
+        border-left-color: #10b981;
+    }
+
+    .template-card.closure {
+        border-left-color: #ef4444;
+    }
+
+    .template-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .template-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .template-number {
+        background: #667eea;
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .template-card.follow-up .template-number {
+        background: #f59e0b;
+    }
+
+    .template-card.negotiation .template-number {
+        background: #10b981;
+    }
+
+    .template-card.closure .template-number {
+        background: #ef4444;
+    }
+
+    .template-meta {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .meta-tag {
+        background: #f3f4f6;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        color: #666;
+    }
+
+    .email-content {
+        background: #f9fafb;
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin: 1rem 0;
+        font-family: "Courier New", monospace;
+        font-size: 0.9rem;
+        line-height: 1.8;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        color: #374151;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .subject-line {
+        background: #e0e7ff;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        font-weight: 500;
+        color: #4338ca;
+    }
+
+    .subject-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+        color: #6366f1;
+    }
+
+    .template-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .btn-copy {
+        background: #667eea;
+        color: white;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+    }
+
+    .btn-copy:hover {
+        background: #5a67d8;
+    }
+
+    .btn-copy.copied {
+        background: #10b981;
+    }
+
+    .variable-list {
+        background: #fffbeb;
+        border: 1px solid #fcd34d;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .variable-list h4 {
+        font-size: 0.9rem;
+        color: #92400e;
+        margin-bottom: 0.5rem;
+    }
+
+    .variable-list ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .variable-list li {
+        font-size: 0.85rem;
+        color: #78350f;
+        padding: 0.25rem 0;
+        font-family: monospace;
+    }
+
+    .category-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .category-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .quick-tools {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .tool-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        text-align: center;
+    }
+
+    .tool-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .tool-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .tool-desc {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 1rem;
+    }
+
+    .search-box {
+        margin-bottom: 2rem;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-tab {
+        padding: 0.5rem 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 20px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+    }
+
+    .filter-tab:hover,
+    .filter-tab.active {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>📧 邮件工具箱</h2>
+    <p>快速访问所有邮件话术模板，支持一键复制。发件邮箱默认：<strong>cooperate@topuplive.com</strong></p>
+</div>
+
+<!-- 快速工具 -->
+<div class="quick-tools">
+    <div class="tool-card">
+        <div class="tool-icon">🎯</div>
+        <div class="tool-title">首封触达</div>
+        <div class="tool-desc">首次联系创作者的标准话术模板</div>
+        <a href="#outreach" class="btn btn-primary">查看模板</a>
+    </div>
+    <div class="tool-card">
+        <div class="tool-icon">🔄</div>
+        <div class="tool-title">跟进邮件</div>
+        <div class="tool-desc">48小时未回复后的跟进话术</div>
+        <a href="#followup" class="btn btn-primary">查看模板</a>
+    </div>
+    <div class="tool-card">
+        <div class="tool-icon">💬</div>
+        <div class="tool-title">谈判回复</div>
+        <div class="tool-desc">处理各种回复场景的应对话术</div>
+        <a href="#negotiation" class="btn btn-primary">查看模板</a>
+    </div>
+    <div class="tool-card">
+        <div class="tool-icon">📋</div>
+        <div class="tool-title">Brief/排期</div>
+        <div class="tool-desc">发送素材包和确认排期的话术</div>
+        <a href="#brief" class="btn btn-primary">查看模板</a>
+    </div>
+</div>
+
+<!-- 搜索和筛选 -->
+<div class="search-box">
+    <input type="text" class="search-input" id="templateSearch" placeholder="🔍 搜索邮件模板（如：首封、跟进、压价、Brief...）">
+</div>
+
+<div class="filter-tabs">
+    <div class="filter-tab active" data-filter="all">全部</div>
+    <div class="filter-tab" data-filter="outreach">首封触达</div>
+    <div class="filter-tab" data-filter="followup">跟进</div>
+    <div class="filter-tab" data-filter="negotiation">谈判</div>
+    <div class="filter-tab" data-filter="brief">Brief/排期</div>
+    <div class="filter-tab" data-filter="closure">结束</div>
+</div>
+
+<!-- 首封触达 -->
+<div class="category-section" id="outreach" data-category="outreach">
+    <h3 class="category-title">📤 首封触达</h3>
+
+    <!-- 模板1: 标准首封 -->
+    <div class="template-card" data-keywords="首封 触达 标准 first outreach">
+        <div class="template-header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="template-number">1</span>
+                <span class="template-title">首封触达（标准版）</span>
+            </div>
+            <span class="badge badge-blue">推荐</span>
+        </div>
+        <div class="template-meta">
+            <span class="meta-tag">📧 邮件</span>
+            <span class="meta-tag">🎮 游戏合作</span>
+            <span class="meta-tag">💰 含报价</span>
+        </div>
+        <div class="subject-line">
+            <div class="subject-label">Subject 备选（选1）</div>
+            <div>1. Collaboration opportunity with {GAME_NAME} (YouTube integration)</div>
+            <div>2. Paid YouTube sponsorship for your next video?</div>
+            <div>3. Brand partnership: {GAME_NAME} + {CREATOR_NAME}</div>
+        </div>
+        <div class="email-content" id="template1">Hi {CREATOR_NAME},
+
+I'm {YOUR_NAME} from {COMPANY/BRAND}. We're working on {GAME_NAME} ({GENRE}, {PLATFORM}) and would love to explore a paid YouTube integration with you.
+
+I've been watching your recent videos—especially {VIDEO_REFERENCE_1} (great pacing and audience engagement). Based on your typical performance, we think your channel could be a strong fit for a brand-awareness campaign.
+
+Proposed deliverable (flexible):
+- 1x YouTube long-form video integration (mid-roll or intro, your choice)
+- Link in description + pinned comment
+
+Budget: ${ANCHOR_PRICE} (open to your rate card / media kit)
+
+If you're interested, could you share your sponsorship email and your current rates for a 60–90s integration? Happy to jump on a quick 15-min call as well.
+
+Best regards,
+{YOUR_NAME}
+{TITLE}
+{COMPANY/BRAND}
+cooperate@topuplive.com</div>
+        <div class="template-actions">
+            <button class="btn-copy" onclick="copyTemplate('template1', this)">📋 复制邮件内容</button>
+            <button class="btn-copy" onclick="copySubject(this)">📋 复制Subject</button>
+        </div>
+        <div class="variable-list">
+            <h4>📝 需要替换的变量</h4>
+            <ul>
+                <li>{CREATOR_NAME} - 创作者称呼</li>
+                <li>{YOUR_NAME} - 你的姓名</li>
+                <li>{COMPANY/BRAND} - 公司/品牌名</li>
+                <li>{GAME_NAME} - 游戏名称</li>
+                <li>{GENRE} - 游戏类型（ARPG/MMO/SLG等）</li>
+                <li>{PLATFORM} - 平台（iOS/Android/PC）</li>
+                <li>{VIDEO_REFERENCE_1} - 引用的近期视频</li>
+                <li>{ANCHOR_PRICE} - 报价锚点</li>
+                <li>{TITLE} - 你的职位</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 模板2: 简短首封 -->
+    <div class="template-card" data-keywords="首封 简短 商务短信 short">
+        <div class="template-header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="template-number">2</span>
+                <span class="template-title">首封触达（简短商务风格）</span>
+            </div>
+            <span class="badge badge-green">高打开率</span>
+        </div>
+        <div class="template-meta">
+            <span class="meta-tag">📧 邮件</span>
+            <span class="meta-tag">⚡ 简短</span>
+            <span class="meta-tag">📱 移动端友好</span>
+        </div>
+        <div class="subject-line">
+            <div class="subject-label">Subject</div>
+            <div>Quick question: paid YouTube sponsorship?</div>
+        </div>
+        <div class="email-content" id="template2">Hi {CREATOR_NAME} — I'm {YOUR_NAME} from {BRAND}. We'd like to book a paid YouTube integration for {GAME_NAME}. Are you open to sponsorships this month?
+
+If yes, could you share your rate card for a 60–90s integration + description link + pinned comment?
+
+Thanks,
+{YOUR_NAME}
+cooperate@topuplive.com</div>
+        <div class="template-actions">
+            <button class="btn-copy" onclick="copyTemplate('template2', this)">📋 复制邮件内容</button>
+        </div>
+    </div>
+
+    <!-- 模板3: 找不到邮箱时 -->
+    <div class="template-card" data-keywords="找不到 邮箱 官网 表单 留言">
+        <div class="template-header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="template-number">3</span>
+                <span class="template-title">找不到邮箱时：官网/表单/经纪公司留言</span>
+            </div>
+        </div>
+        <div class="template-meta">
+            <span class="meta-tag">📝 表单留言</span>
+            <span class="meta-tag">🏢 经纪公司</span>
+        </div>
+        <div class="email-content" id="template3">Hi {CREATOR_NAME}/{MANAGER_NAME},
+
+I'm reaching out from {BRAND}. We'd love to discuss a paid YouTube integration for our game {GAME_NAME}.
+
+Could you please let me know the best email for sponsorship inquiries (or feel free to reply here)?
+
+Thank you,
+{YOUR_NAME}
+cooperate@topuplive.com</div>
+        <div class="template-actions">
+            <button class="btn-copy" onclick="copyTemplate('template3', this)">📋 复制内容</button>
+        </div>
+    </div>
+</div>
+
+<!-- 跟进邮件 -->
+<div class="category-section" id="followup" data-category="followup">
+    <h3 class="category-title">🔄 跟进邮件</h3>
+
+    <!-- 模板4: 温和跟进1 -->
+    <div class="template-card follow-up" data-keywords="跟进 48小时 温和 followup">
+        <div class="template-header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="template-number">4</span>
+                <span class="template-title">48小时未回复：温和跟进 #1</span>
+            </div>
+            <span class="badge badge-yellow">3天后</span>
+        </div>
+        <div class="template-meta">
+            <span class="meta-tag">🔄 跟进</span>
+            <span class="meta-tag">⏰ 48小时后</span>
+        </div>
+        <div class="subject-line">
+            <div class="subject-label">Subject</div>
+            <div>Re: Collaboration opportunity with {GAME_NAME}</div>
+        </div>
+        <div class="email-content" id="template4">Hi {CREATOR_NAME},
+
+Just following up in case my last email got buried. We'd still love to explore a paid YouTube integration for {GAME_NAME}.
+
+If it helps, here's the quick ask:
+- 1x long-form integration (60–90s)
+- link in description + pinned comment
+
+Could you share your rate card / media kit, or point me to the right contact?
+
+Best,
+{YOUR_NAME}
+cooperate@topuplive.com</div>
+        <div class="template-actions">
+            <button class="btn-copy" onclick="copyTemplate('template4', this)">📋 复制邮件内容</button>
+        </div>
+    </div>
+
+    <!-- 模板5: 跟进2 -->
+    <div class="template-card follow-up" data-keywords="跟进 最后确认 时间窗口">
+        <div class="template-header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="template-number">5</span>
+                <span class="template-title">48小时未回复：跟进 #2（给时间窗口）</span>
+            </div>
+            <span class="badge badge-yellow">7天后</span>
+        </div>
+        <div class="template-meta">
+            <span class="meta-tag">🔄 跟进</span>
+            <span class="meta-tag">⏰ 最后确认</span>
+        </div>
+        <div class="subject-line">
+            <div class="subject-label">Subject</div>
+            <div>Last check-in: {GAME_NAME} sponsorship</div>
+        </div>
+        <div class="email-content" id="template5">Hi {CREATOR_NAME},
+
+Last quick check-in from my side. We're finalizing creators for this campaign by {DEADLINE_DATE}. If you're open to a paid integration, could you send your rates/media kit before then?
+
+If now isn't a fit, no worries at all—happy to reconnect later.
+
+Best regards,
+{YOUR_NAME}
+cooperate@topuplive.com</div>
+        <div class="template-actions">
+            <button class="btn-copy" onclick="copyTemplate('template5', this)">📋 复制邮件内容</button>
+        </div>
+    </div>
+</div>
+
+<!-- 谈判回复 -->
+<div class="category-section" id="negotiation" data-category="negotiation">
+    <h3 class="category-title">💬 谈判回复</h3>
+
+    <!-- 模板6: 对方要报价 -->
+    <div class="template-card negotiation" data-keywords="谈判 报价 价格 需求 details">
+        <div class="template-header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="template-number">6</span>
+                <span class="template-title">对方回复：要你先报更明确的价格/需求</span>
+            </div>
+        </div>
+        <div class="template-meta">
+            <span class="meta-tag">💬 谈判</span>
+            <span class="meta-tag">💰 报价</span>
+        </div>
+        <div class="subject-line">
+            <div class="subject-label">Subject</div>
+            <div>Re: {GAME_NAME} YouTube integration details</div>
+        </div>
+        <div class="email-content" id="template6">Hi {CREATOR_NAME},
+
+Thanks for getting back to me!
+
+Here's what we're looking for (flexible based on your creative style):
+- 1x long-form YouTube video integration
+- 60–90s mention (intro or mid-roll)
+- Link in description + pinned comment
+- Posting window: {POST_WINDOW}
+
+Budget range: ${TARGET_PRICE_LOW}–${TARGET_PRICE_HIGH} (depending on exact placement/length and any add-ons)
+
+If you share your rate card, we can lock the scope and move quickly.
+
+Best,
+{YOUR_NAME}
+cooperate@topuplive.com</div>
+        <div class="template-actions">
+            <button class="btn-copy" onclick="copyTemplate('template6', this)">📋 复制邮件内容</button>
+        </div>
+    </div>
+
+    <!-- 模板7: 对方压价 -->
+    <div class="template-card negotiation" data-keywords="谈判 压价 方案 降价 options">
+        <div class="template-header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="template-number">7</span>
+                <span class="template-title">对方压价：给"两档方案"</span>
+            </div>
+            <span class="badge badge-blue">常用</span>
+        </div>
+        <div class="template-meta">
+            <span class="meta-tag">💬 谈判</span>
+            <span class="meta-tag">💰 压价应对</span>
+        </div>
+        <div class="subject-line">
+            <div class="subject-label">Subject</div>
+            <div>Re: {GAME_NAME} partnership — options</div>
+        </div>
+        <div class="email-content" id="template7">Hi {CREATOR_NAME},
+
+Totally understand the budget constraints. To make this work, here are two options:
+
+Option A (Adjusted fee): ${LOWER_FEE}
+- 45–60s integration
+- Description link only (no pinned comment)
+- 1 round of revisions
+
+Option B (Keep scope): ${TARGET_PRICE}
+- 60–90s integration
+- Description link + pinned comment
+- {ADD_ON_1} included (e.g., Community post or Shorts teaser)
+
+Let me know which option you prefer, or share your rate card and we'll align on the best package.
+
+Best,
+{YOUR_NAME}
+cooperate@topuplive.com</div>
+        <div class="template-actions">
+            <button class="btn-copy" onclick="copyTemplate('template7', this)">📋 复制邮件内容</button>
+        </div>
+    </div>
+
+    <!-- 模板8: 要求保证播放量 -->
+    <div class="template-card negotiation" data-keywords="谈判 保证 播放量 转化 performance">
+        <div class="template-header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="template-number">8</span>
+                <span class="template-title">对方要求"保证播放量/转化"：合规拒绝</span>
+            </div>
+        </div>
+        <div class="template-meta">
+            <span class="meta-tag">💬 谈判</span>
+            <span class="meta-tag">⚠️ 合规拒绝</span>
+        </div>
+        <div class="subject-line">
+            <div class="subject-label">Subject</div>
+            <div>Re: Performance expectations for {GAME_NAME}</div>
+        </div>
+        <div class="email-content" id="template8">Hi {CREATOR_NAME},
+
+Thanks for the note. For clarity, we can't include guaranteed views/conversions in the agreement since performance depends on many factors outside anyone's direct control.
+
+What we *can* do is define clear deliverables and quality standards:
+- Integration length/placement
+- Link placement (description + pinned comment)
+- Posting window
+
+If you'd like, we can also add a performance bonus (e.g., extra payment if the video exceeds {VIEWS_THRESHOLD} views within {DAYS} days).
+
+Best regards,
+{YOUR_NAME}
+cooperate@topuplive.com</div>
+        <div class="template-actions">
+            <button class="btn-copy" onclick="copyTemplate('template8', this)">📋 复制邮件内容</button>
+        </div>
+    </div>
+</div>
+
+<!-- Brief/排期 -->
+<div class="category-section" id="brief" data-category="brief">
+    <h3 class="category-title">📋 Brief & 排期</h3>
+
+    <!-- 模板9: 发送Brief -->
+    <div class="template-card" data-keywords="brief 素材包 assets">
+        <div class="template-header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="template-number">9</span>
+                <span class="template-title">发送 Brief/素材包</span>
+            </div>
+        </div>
+        <div class="template-meta">
+            <span class="meta-tag">📦 素材对接</span>
+            <span class="meta-tag">📋 Brief</span>
+        </div>
+        <div class="subject-line">
+            <div class="subject-label">Subject</div>
+            <div>{GAME_NAME} — Brief & assets for your review</div>
+        </div>
+        <div class="email-content" id="template9">Hi {CREATOR_NAME},
+
+Great — sharing the campaign brief and assets below:
+
+- Brief (Google Doc/PDF): {BRIEF_LINK}
+- Asset pack (drive link): {ASSET_PACK_LINK}
+- Tracking link (for description): {TRACKING_LINK}
+- Key points (TL;DR): {KEY_POINTS_1_LINE}
+
+Could you please confirm:
+1) Your planned posting date/time
+2) Whether you prefer intro or mid-roll placement
+
+Once confirmed, we'll proceed with the agreement and timeline.
+
+Best,
+{YOUR_NAME}
+cooperate@topuplive.com</div>
+        <div class="template-actions">
+            <button class="btn-copy" onclick="copyTemplate('template9', this)">📋 复制邮件内容</button>
+        </div>
+    </div>
+
+    <!-- 模板10: 确认排期 -->
+    <div class="template-card" data-keywords="排期 确认 schedule 上线时间">
+        <div class="template-header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="template-number">10</span>
+                <span class="template-title">确认排期（锁定上线时间）</span>
+            </div>
+        </div>
+        <div class="template-meta">
+            <span class="meta-tag">📅 排期</span>
+            <span class="meta-tag">✅ 确认</span>
+        </div>
+        <div class="subject-line">
+            <div class="subject-label">Subject</div>
+            <div>Confirming schedule — {GAME_NAME} integration</div>
+        </div>
+        <div class="email-content" id="template10">Hi {CREATOR_NAME},
+
+Perfect — confirming the schedule:
+- Planned posting date/time: {POST_DATETIME} ({TIMEZONE})
+- Integration placement: {PLACEMENT}
+- Deliverables: {DELIVERABLES_SHORT}
+
+Please share a private preview link (if applicable) by {PREVIEW_DEADLINE}, and we'll provide consolidated feedback within {FEEDBACK_TURNAROUND_HOURS} hours.
+
+Thanks!
+{YOUR_NAME}
+cooperate@topuplive.com</div>
+        <div class="template-actions">
+            <button class="btn-copy" onclick="copyTemplate('template10', this)">📋 复制邮件内容</button>
+        </div>
+    </div>
+
+    <!-- 模板11: 上线验收 -->
+    <div class="template-card" data-keywords="上线 验收 链接 tracking">
+        <div class="template-header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="template-number">11</span>
+                <span class="template-title">上线验收（要链接 + 轻量复盘）</span>
+            </div>
+        </div>
+        <div class="template-meta">
+            <span class="meta-tag">🎬 上线</span>
+            <span class="meta-tag">📊 数据</span>
+        </div>
+        <div class="subject-line">
+            <div class="subject-label">Subject</div>
+            <div>{GAME_NAME} is live? Link for tracking</div>
+        </div>
+        <div class="email-content" id="template11">Hi {CREATOR_NAME},
+
+Hope you're doing well. Has the video gone live? If yes, could you share the live URL so we can start tracking?
+
+Also, if you have early stats (first 24h views / audience retention highlights), feel free to share—totally optional.
+
+Thanks again,
+{YOUR_NAME}
+cooperate@topuplive.com</div>
+        <div class="template-actions">
+            <button class="btn-copy" onclick="copyTemplate('template11', this)">📋 复制邮件内容</button>
+        </div>
+    </div>
+</div>
+
+<!-- 结束 -->
+<div class="category-section" id="closure" data-category="closure">
+    <h3 class="category-title">❌ 结束/留存</h3>
+
+    <!-- 模板12: 礼貌拒绝 -->
+    <div class="template-card closure" data-keywords="拒绝 留存 没档期 not interested">
+        <div class="template-header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="template-number">12</span>
+                <span class="template-title">礼貌拒绝/留存（对方不接/没档期）</span>
+            </div>
+        </div>
+        <div class="template-meta">
+            <span class="meta-tag">❌ 结束</span>
+            <span class="meta-tag">🤝 留存</span>
+        </div>
+        <div class="subject-line">
+            <div class="subject-label">Subject</div>
+            <div>Re: {GAME_NAME} partnership</div>
+        </div>
+        <div class="email-content" id="template12">Hi {CREATOR_NAME},
+
+Thanks for letting me know. No worries at all.
+
+If it's okay, I'll keep your contact for future campaigns that may fit your schedule better. Feel free to reach out anytime if your availability changes.
+
+Best,
+{YOUR_NAME}
+cooperate@topuplive.com</div>
+        <div class="template-actions">
+            <button class="btn-copy" onclick="copyTemplate('template12', this)">📋 复制邮件内容</button>
+        </div>
+    </div>
+</div>
+
+<!-- 变量清单 -->
+<div class="card" style="margin-top: 2rem;">
+    <h3>📝 完整变量清单</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <div>
+            <h4 style="color: #667eea; margin-bottom: 0.5rem;">基础信息</h4>
+            <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
+                <li><code>{CREATOR_NAME}</code> - 创作者称呼</li>
+                <li><code>{channel_url}</code> - 频道链接</li>
+                <li><code>{VIDEO_REFERENCE_1}</code> - 引用视频</li>
+            </ul>
+        </div>
+        <div>
+            <h4 style="color: #667eea; margin-bottom: 0.5rem;">游戏信息</h4>
+            <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
+                <li><code>{GAME_NAME}</code> - 游戏名</li>
+                <li><code>{GENRE}</code> - 类型（ARPG/MMO/SLG）</li>
+                <li><code>{PLATFORM}</code> - iOS/Android/PC</li>
+            </ul>
+        </div>
+        <div>
+            <h4 style="color: #667eea; margin-bottom: 0.5rem;">报价相关</h4>
+            <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
+                <li><code>{ANCHOR_PRICE}</code> - 锚点价</li>
+                <li><code>{TARGET_PRICE}</code> - 目标价</li>
+                <li><code>{TARGET_PRICE_LOW}</code> - 最低价</li>
+                <li><code>{TARGET_PRICE_HIGH}</code> - 最高价</li>
+                <li><code>{LOWER_FEE}</code> - 降价后费用</li>
+            </ul>
+        </div>
+        <div>
+            <h4 style="color: #667eea; margin-bottom: 0.5rem;">时间/排期</h4>
+            <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
+                <li><code>{POST_WINDOW}</code> - 发布时间窗口</li>
+                <li><code>{DEADLINE_DATE}</code> - 选人截止日</li>
+                <li><code>{POST_DATETIME}</code> - 计划发布时间</li>
+                <li><code>{TIMEZONE}</code> - 时区</li>
+            </ul>
+        </div>
+        <div>
+            <h4 style="color: #667eea; margin-bottom: 0.5rem;">链接/素材</h4>
+            <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
+                <li><code>{BRIEF_LINK}</code> - Brief链接</li>
+                <li><code>{ASSET_PACK_LINK}</code> - 素材包链接</li>
+                <li><code>{TRACKING_LINK}</code> - 追踪链接</li>
+            </ul>
+        </div>
+        <div>
+            <h4 style="color: #667eea; margin-bottom: 0.5rem;">其他</h4>
+            <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
+                <li><code>{YOUR_NAME}</code> - 你的姓名</li>
+                <li><code>{TITLE}</code> - 职位</li>
+                <li><code>{COMPANY/BRAND}</code> - 公司/品牌</li>
+                <li><code>{VIEWS_THRESHOLD}</code> - 播放量阈值</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 复制模板内容
+    function copyTemplate(elementId, button) {
+        const content = document.getElementById(elementId).innerText;
+        navigator.clipboard.writeText(content).then(() => {
+            const originalText = button.innerText;
+            button.innerText = '✅ 已复制!';
+            button.classList.add('copied');
+            setTimeout(() => {
+                button.innerText = originalText;
+                button.classList.remove('copied');
+            }, 2000);
+        });
+    }
+
+    // 复制Subject
+    function copySubject(button) {
+        const subjectLine = button.closest('.template-card').querySelector('.subject-line');
+        const subjects = subjectLine.innerText.replace('SUBJECT 备选（选1）', '').replace('SUBJECT', '').trim();
+        navigator.clipboard.writeText(subjects).then(() => {
+            const originalText = button.innerText;
+            button.innerText = '✅ 已复制!';
+            button.classList.add('copied');
+            setTimeout(() => {
+                button.innerText = originalText;
+                button.classList.remove('copied');
+            }, 2000);
+        });
+    }
+
+    // 搜索功能
+    document.getElementById('templateSearch').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const templates = document.querySelectorAll('.template-card');
+
+        templates.forEach(template => {
+            const keywords = template.getAttribute('data-keywords') || '';
+            const title = template.querySelector('.template-title').innerText.toLowerCase();
+            const content = template.querySelector('.email-content').innerText.toLowerCase();
+
+            if (keywords.includes(searchTerm) || title.includes(searchTerm) || content.includes(searchTerm)) {
+                template.style.display = 'block';
+            } else {
+                template.style.display = 'none';
+            }
+        });
+    });
+
+    // 筛选功能
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            // 更新活动状态
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+
+            const filter = this.getAttribute('data-filter');
+            const categories = document.querySelectorAll('.category-section');
+
+            categories.forEach(category => {
+                if (filter === 'all' || category.getAttribute('data-category') === filter) {
+                    category.style.display = 'block';
+                } else {
+                    category.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

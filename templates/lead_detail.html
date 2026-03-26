@@ -31,6 +31,9 @@
             <div style="display: flex; gap: 0.5rem; align-items: center;">
                 <input type="text" name="game_name" placeholder="游戏名称" class="form-control" style="width: 150px;" required>
                 <button type="submit" class="btn btn-primary">{{ action.label }}</button>
+                {% if email_mock_mode is defined and email_mock_mode %}
+                <span style="font-size: 0.75rem; color: #f59e0b; margin-left: 0.5rem;">⚠️ 模拟模式</span>
+                {% endif %}
             </div>
             {% elif action.name == 'handle_reply' %}
             <div style="display: flex; gap: 0.5rem; align-items: center;">
@@ -95,14 +98,27 @@
             </div>
             <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
                 {% for email in creator_profile.about_emails %}
-                <a href="mailto:{{ email }}?subject=Partnership Opportunity - {{ creator_profile.creator_name }}&body=Hi {{ creator_profile.creator_name }},%0A%0AI hope this email finds you well. My name is [Your Name] from TOPUPlive, and I'm reaching out regarding a potential collaboration opportunity.%0A%0AWe came across your YouTube channel and were impressed by your content, particularly your videos related to gaming. We believe there could be a great synergy between your audience and our brand.%0A%0AWould you be open to discussing a potential partnership? We'd love to learn more about your channel, audience demographics, and collaboration rates.%0A%0ALooking forward to hearing from you.%0A%0ABest regards,%0A[Your Name]%0APartnership Manager%0ATOPUPlive%0Acooperate@topuplive.com" 
-                   style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);" 
-                   onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 8px rgba(245, 158, 11, 0.4)'" 
-                   onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 4px rgba(245, 158, 11, 0.3)'">
-                    <span>📧</span>
-                    <span>{{ email }}</span>
-                    <span style="font-size: 0.75rem; opacity: 0.9; margin-left: 0.5rem;">(Click to send partnership email)</span>
-                </a>
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <!-- 使用系统邮件工具发送 -->
+                    <form method="POST" action="/leads/{{ context.channel_url }}/send_email" style="display: inline;">
+                        <input type="hidden" name="game_name" value="Our Game">
+                        <input type="hidden" name="use_email" value="{{ email }}">
+                        <button type="submit" 
+                                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3); cursor: pointer;"
+                                onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 8px rgba(245, 158, 11, 0.4)'" 
+                                onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 4px rgba(245, 158, 11, 0.3)'">
+                            <span>📧</span>
+                            <span>{{ email }}</span>
+                            <span style="font-size: 0.75rem; opacity: 0.9; margin-left: 0.5rem;">(Click to send via system)</span>
+                        </button>
+                    </form>
+                    <!-- 备用：使用系统默认邮件客户端 -->
+                    <a href="mailto:{{ email }}" 
+                       style="font-size: 0.8rem; color: #92400e; text-decoration: underline;"
+                       title="Open in your default email client">
+                        ↗️ Open in mail app
+                    </a>
+                </div>
                 {% endfor %}
             </div>
         </div>
@@ -123,14 +139,27 @@
             </div>
             <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
                 {% for email in creator_profile.about_emails %}
-                <a href="mailto:{{ email }}?subject=Partnership Opportunity - {{ creator_profile.creator_name }}&body=Hi {{ creator_profile.creator_name }},%0A%0AI hope this email finds you well. My name is [Your Name] from TOPUPlive, and I'm reaching out regarding a potential collaboration opportunity.%0A%0AWe came across your YouTube channel and were impressed by your content, particularly your videos related to gaming. We believe there could be a great synergy between your audience and our brand.%0A%0AWould you be open to discussing a potential partnership? We'd love to learn more about your channel, audience demographics, and collaboration rates.%0A%0ALooking forward to hearing from you.%0A%0ABest regards,%0A[Your Name]%0APartnership Manager%0ATOPUPlive%0Acooperate@topuplive.com" 
-                   style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);" 
-                   onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 8px rgba(245, 158, 11, 0.4)'" 
-                   onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 4px rgba(245, 158, 11, 0.3)'">
-                    <span>📧</span>
-                    <span>{{ email }}</span>
-                    <span style="font-size: 0.75rem; opacity: 0.9; margin-left: 0.5rem;">(Click to send partnership email)</span>
-                </a>
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <!-- 使用系统邮件工具发送 -->
+                    <form method="POST" action="/leads/{{ context.channel_url }}/send_email" style="display: inline;">
+                        <input type="hidden" name="game_name" value="Our Game">
+                        <input type="hidden" name="use_email" value="{{ email }}">
+                        <button type="submit" 
+                                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3); cursor: pointer;"
+                                onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 8px rgba(245, 158, 11, 0.4)'" 
+                                onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 4px rgba(245, 158, 11, 0.3)'">
+                            <span>📧</span>
+                            <span>{{ email }}</span>
+                            <span style="font-size: 0.75rem; opacity: 0.9; margin-left: 0.5rem;">(Click to send via system)</span>
+                        </button>
+                    </form>
+                    <!-- 备用：使用系统默认邮件客户端 -->
+                    <a href="mailto:{{ email }}" 
+                       style="font-size: 0.8rem; color: #92400e; text-decoration: underline;"
+                       title="Open in your default email client">
+                        ↗️ Open in mail app
+                    </a>
+                </div>
                 {% endfor %}
             </div>
         </div>
@@ -226,6 +255,27 @@
             </form>
         </div>
     </div>
+    
+    <!-- 快速发送邮件按钮 -->
+    {% if recommended_contact and (recommended_contact.type in ['email', 'business_email']) %}
+    <div style="margin-top: 1rem; padding: 1rem; background: #f0fdf4; border-radius: 8px; border: 1px solid #86efac;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <div style="font-weight: 600; color: #166534;">推荐联系方式: {{ recommended_contact.value }}</div>
+                <div style="font-size: 0.85rem; color: #15803d; margin-top: 0.25rem;">可靠度: {{ "%.0f"|format(recommended_contact.confidence * 100) if recommended_contact.confidence else 'N/A' }}%</div>
+            </div>
+            <form method="POST" action="/leads/{{ context.channel_url }}/send_email" style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" name="game_name" placeholder="游戏名称" class="form-control" style="width: 150px;" required>
+                <button type="submit" class="btn btn-success">📧 发送合作邮件</button>
+            </form>
+        </div>
+        {% if email_mock_mode is defined and email_mock_mode %}
+        <div style="margin-top: 0.75rem; padding: 0.5rem; background: #fef3c7; border-radius: 6px; font-size: 0.8rem; color: #92400e;">
+            ⚠️ 当前处于模拟模式，邮件不会实际发送。请在 .env 文件中配置 SMTP 以启用真实发送。
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
     {% if context.contact_verification and context.contact_verification.last_update %}
     <div style="font-size:0.75rem; color:#999; margin-top:0.25rem;">
         上次刷新: {{ context.contact_verification.last_update[:19] }}

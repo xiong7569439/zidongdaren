@@ -307,6 +307,12 @@ def lead_detail(channel_url):
         flash("线索不存在", "error")
         return redirect(url_for("leads"))
     
+    # 获取邮件工具状态
+    email_mock_mode = True
+    if email_tool:
+        stats = email_tool.get_stats()
+        email_mock_mode = stats.get("mock_mode", True)
+    
     # 准备展示数据
     data = {
         "context": ctx,
@@ -319,7 +325,8 @@ def lead_detail(channel_url):
         "email_history": ctx.email_history or [],
         "negotiation_log": ctx.negotiation_log or [],
         "brief_data": ctx.brief_data or {},
-        "available_actions": get_available_actions(ctx)
+        "available_actions": get_available_actions(ctx),
+        "email_mock_mode": email_mock_mode
     }
     
     return render_template("lead_detail.html", **data)
@@ -396,13 +403,14 @@ def find_contact(channel_url):
     return redirect(url_for("lead_detail", channel_url=channel_url))
 
 
-@app.route("/leads/<path:channel_url>/send_email", methods=["POST"])
-def send_email(channel_url):
-    """发送合作邮件"""
+@app.route("/leads/<path:channel_url>/compose_email", methods=["GET", "POST"])
+def compose_email(channel_url):
+    """撰写邮件 - 预览和编辑页面"""
     ctx = active_leads.get(channel_url)
     
     if not ctx:
-        return jsonify({"status": "error", "message": "线索不存在"})
+        flash("线索不存在", "error")
+        return redirect(url_for("leads"))
     
     if not ctx.recommended_contact:
         flash("请先查找联系方式", "error")
@@ -412,10 +420,57 @@ def send_email(channel_url):
         flash("邮件工具未配置", "error")
         return redirect(url_for("lead_detail", channel_url=channel_url))
     
-    game_name = request.form.get("game_name", "Our Game")
-    template = request.form.get("template", "standard")
+    # 检查邮件工具是否处于模拟模式
+    email_stats = email_tool.get_stats()
+    is_mock_mode = email_stats.get("mock_mode", True)
     
-    # 生成邮件
+    if request.method == "POST":
+        # 实际发送邮件
+        subject = request.form.get("subject", "")
+        body = request.form.get("body", "")
+        to_addr = ctx.recommended_contact.get("value")
+        
+        if not subject or not body:
+            flash("邮件主题和正文不能为空", "error")
+            return redirect(url_for("compose_email", channel_url=channel_url))
+        
+        send_result = email_tool.send_outreach_email(
+            to_addr=to_addr,
+            creator_name=ctx.creator_name,
+            subject=subject,
+            body=body
+        )
+        
+        if send_result["status"] == "success":
+            # 更新状态（如果当前状态允许流转到 OUTREACH_SENT）
+            from src.core.pipeline import PipelineEngine, PipelineStage
+            engine = PipelineEngine(ctx)
+            if engine.can_transition_to(PipelineStage.OUTREACH_SENT):
+                engine.transition(PipelineStage.OUTREACH_SENT, "已发送首封合作邮件")
+            else:
+                # 记录邮件历史但不改变状态（允许重复发送）
+                ctx.email_history.append({
+                    "type": "outbound",
+                    "to": to_addr,
+                    "subject": subject,
+                    "sent_at": datetime.now().isoformat(),
+                    "note": "重复发送或跟进邮件"
+                })
+            
+            if send_result.get("mock"):
+                flash(f"【模拟模式】邮件已记录（未实际发送）。请在控制台查看邮件内容。", "success")
+            else:
+                flash(f"邮件发送成功! ID: {send_result.get('message_id')}", "success")
+        else:
+            flash(f"邮件发送失败: {send_result.get('error')}", "error")
+        
+        return redirect(url_for("lead_detail", channel_url=channel_url))
+    
+    # GET 请求：显示邮件撰写页面
+    game_name = request.args.get("game_name", "Our Game")
+    template = request.args.get("template", "standard")
+    
+    # 生成邮件草稿
     agent = OutreachAgent()
     result = agent.execute(ctx, game_name=game_name, template_type=template)
     
@@ -425,26 +480,43 @@ def send_email(channel_url):
     
     email_draft = result.get("email_draft", {})
     
-    # 发送邮件
-    to_addr = ctx.recommended_contact.get("value")
-    send_result = email_tool.send_outreach_email(
-        to_addr=to_addr,
-        creator_name=ctx.creator_name,
-        subject=email_draft.get("subject", ""),
-        body=email_draft.get("body", "")
-    )
+    return render_template("compose_email.html",
+                         context=ctx,
+                         email_draft=email_draft,
+                         recipient=ctx.recommended_contact,
+                         is_mock_mode=is_mock_mode,
+                         email_stats=email_stats)
+
+
+@app.route("/leads/<path:channel_url>/send_email", methods=["POST"])
+def send_email(channel_url):
+    """发送合作邮件（旧接口，重定向到新页面）"""
+    game_name = request.form.get("game_name", "Our Game")
+    use_email = request.form.get("use_email", "")
     
-    if send_result["status"] == "success":
-        # 更新状态
-        from src.core.pipeline import PipelineEngine
-        engine = PipelineEngine(ctx)
-        engine.transition(PipelineStage.OUTREACH_SENT, "已发送首封合作邮件")
-        
-        flash(f"邮件发送成功! ID: {send_result.get('message_id')}", "success")
-    else:
-        flash(f"邮件发送失败: {send_result.get('error')}", "error")
+    # 如果指定了邮箱，先设置为推荐联系方式
+    if use_email:
+        ctx = active_leads.get(channel_url)
+        if ctx:
+            # 检查是否已存在该联系方式
+            existing = [c for c in ctx.contact_candidates if c.get("value") == use_email]
+            if not existing:
+                ctx.contact_candidates.append({
+                    "type": "business_email",
+                    "value": use_email,
+                    "source": "about_page",
+                    "confidence": 0.9,
+                    "notes": "From channel About section"
+                })
+            # 设置为推荐联系方式
+            ctx.recommended_contact = {
+                "type": "business_email",
+                "value": use_email,
+                "source": "about_page",
+                "confidence": 0.9
+            }
     
-    return redirect(url_for("lead_detail", channel_url=channel_url))
+    return redirect(url_for("compose_email", channel_url=channel_url, game_name=game_name))
 
 
 @app.route("/leads/<path:channel_url>/handle_reply", methods=["POST"])
@@ -765,6 +837,9 @@ def api_followup_queue():
         })
     
     return jsonify({"status": "success", "data": queue, "count": len(queue)})
+
+
+@app.route("/search", methods=["GET", "POST"])
 def search_creators():
     """YouTube创作者搜索 - 支持筛选和排序"""
     results = []
@@ -968,6 +1043,12 @@ def api_stats():
     return jsonify({"status": "success", "data": stats})
 
 
+@app.route("/email-tools")
+def email_tools():
+    """邮件工具页面 - 邮件话术模板库"""
+    return render_template("email_tools.html")
+
+
 @app.route("/settings")
 def settings():
     """设置页面"""
@@ -1042,7 +1123,19 @@ def get_available_actions(ctx: PipelineContext) -> List[Dict]:
                 "method": "POST"
             })
     
-    elif stage in [PipelineStage.OUTREACH_SENT, PipelineStage.NEGOTIATING]:
+    # 如果已有联系方式，始终显示邮件发送选项（便于重新发送或测试）
+    if ctx.recommended_contact and email_tool and stage.value not in ['outreach_sent', 'negotiating', 'brief_sent', 'schedule_confirmed', 'deliverable_live', 'wrap_up', 'closed_won', 'closed_lost']:
+        # 检查是否已存在发送邮件操作
+        existing_send = [a for a in actions if a['name'] == 'send_email']
+        if not existing_send:
+            actions.append({
+                "name": "send_email",
+                "label": "📧 发送合作邮件",
+                "url": f"/leads/{ctx.channel_url}/send_email",
+                "method": "POST"
+            })
+
+    if stage in [PipelineStage.OUTREACH_SENT, PipelineStage.NEGOTIATING]:
         actions.append({
             "name": "handle_reply",
             "label": "💬 处理回复",

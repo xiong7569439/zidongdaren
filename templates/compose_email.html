@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block title %}撰写邮件 - {{ context.creator_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .email-preview {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .email-header {
+        background: #f9fafb;
+        padding: 1.25rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .email-field {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .email-field:last-child {
+        border-bottom: none;
+    }
+    
+    .email-label {
+        width: 80px;
+        color: #6b7280;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .email-value {
+        flex: 1;
+        color: #374151;
+    }
+    
+    .email-body-preview {
+        padding: 1.5rem;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.8;
+        color: #374151;
+        white-space: pre-wrap;
+        min-height: 300px;
+    }
+    
+    .compose-form textarea {
+        width: 100%;
+        min-height: 400px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.8;
+        padding: 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        resize: vertical;
+    }
+    
+    .compose-form input[type="text"] {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    
+    .warning-banner {
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .warning-banner .icon {
+        font-size: 1.5rem;
+    }
+    
+    .warning-banner.mock-mode {
+        background: #fee2e2;
+        border-color: #ef4444;
+    }
+    
+    .warning-banner.mock-mode .icon {
+        color: #dc2626;
+    }
+    
+    .info-banner {
+        background: #dbeafe;
+        border: 1px solid #3b82f6;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .info-banner .icon {
+        font-size: 1.5rem;
+        color: #2563eb;
+    }
+    
+    .action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem;
+        background: #f9fafb;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .template-selector {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .template-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid #d1d5db;
+        background: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+    
+    .template-btn:hover {
+        background: #f3f4f6;
+    }
+    
+    .template-btn.active {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    
+    .creator-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f0f9ff;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .creator-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .creator-details h4 {
+        margin: 0;
+        color: #333;
+    }
+    
+    .creator-details p {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.85rem;
+        color: #666;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1.5rem;">
+    <a href="{{ url_for('lead_detail', channel_url=context.channel_url) }}" class="btn btn-secondary">← 返回线索详情</a>
+</div>
+
+<h2 style="margin-bottom: 1.5rem;">📧 撰写合作邮件</h2>
+
+<!-- 创作者信息 -->
+<div class="creator-info">
+    <div class="creator-avatar">{{ context.creator_name[0] if context.creator_name else '?' }}</div>
+    <div class="creator-details">
+        <h4>{{ context.creator_name }}</h4>
+        <p>收件人: {{ recipient.value }} | 类型: {{ recipient.type }}</p>
+    </div>
+</div>
+
+<!-- 模拟模式警告 -->
+{% if is_mock_mode %}
+<div class="warning-banner mock-mode">
+    <span class="icon">⚠️</span>
+    <div>
+        <strong>当前处于模拟模式，邮件不会实际发送</strong>
+        <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #7f1d1d;">
+            原因：SMTP未配置。请在 .env 文件中设置 EMAIL_SMTP_HOST、EMAIL_SENDER 和 EMAIL_PASSWORD
+        </p>
+    </div>
+</div>
+{% else %}
+<div class="info-banner">
+    <span class="icon">✉️</span>
+    <div>
+        <strong>邮件将实际发送</strong>
+        <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #1e40af;">
+            发件人: {{ email_stats.smtp_configured and 'cooperate@topuplive.com' or '系统邮箱' }}
+        </p>
+    </div>
+</div>
+{% endif %}
+
+<!-- 模板选择 -->
+<div class="card">
+    <h3 class="section-title">📝 选择邮件模板</h3>
+    <div class="template-selector">
+        <a href="{{ url_for('compose_email', channel_url=context.channel_url, game_name=request.args.get('game_name', 'Our Game'), template='standard') }}" 
+           class="template-btn {{ 'active' if request.args.get('template', 'standard') == 'standard' else '' }}">
+            标准版（详细）
+        </a>
+        <a href="{{ url_for('compose_email', channel_url=context.channel_url, game_name=request.args.get('game_name', 'Our Game'), template='short') }}" 
+           class="template-btn {{ 'active' if request.args.get('template') == 'short' else '' }}">
+            简短版（推荐）
+        </a>
+    </div>
+</div>
+
+<!-- 邮件编辑表单 -->
+<form method="POST" action="{{ url_for('compose_email', channel_url=context.channel_url) }}" class="compose-form">
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <div class="email-header">
+            <div class="email-field">
+                <span class="email-label">收件人:</span>
+                <span class="email-value">{{ recipient.value }}</span>
+            </div>
+            <div class="email-field">
+                <span class="email-label">发件人:</span>
+                <span class="email-value">cooperate@topuplive.com</span>
+            </div>
+            <div class="email-field">
+                <span class="email-label">主题:</span>
+                <input type="text" name="subject" value="{{ email_draft.subject }}" required>
+            </div>
+        </div>
+        
+        <textarea name="body" required>{{ email_draft.body }}</textarea>
+        
+        <div class="action-bar">
+            <div>
+                <span style="color: #666; font-size: 0.9rem;">
+                    字数: <span id="wordCount">{{ email_draft.word_count }}</span> 词
+                </span>
+            </div>
+            <div style="display: flex; gap: 0.75rem;">
+                <a href="{{ url_for('lead_detail', channel_url=context.channel_url) }}" class="btn btn-secondary">取消</a>
+                <button type="submit" class="btn btn-primary">
+                    {% if is_mock_mode %}
+                    🧪 模拟发送（测试）
+                    {% else %}
+                    📤 发送邮件
+                    {% endif %}
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- 邮件发送提示 -->
+<div class="card" style="background: #f0fdf4; border: 1px solid #86efac;">
+    <h4 style="color: #166534; margin-bottom: 0.75rem;">💡 发送前检查清单</h4>
+    <ul style="color: #166534; line-height: 1.8; margin: 0; padding-left: 1.25rem;">
+        <li>确认收件人邮箱地址正确</li>
+        <li>检查邮件主题是否清晰吸引人</li>
+        <li>确认游戏名称和报价信息准确</li>
+        <li>检查是否有拼写或语法错误</li>
+        {% if is_mock_mode %}
+        <li><strong>当前为模拟模式，邮件将输出到控制台而不会实际发送</strong></li>
+        {% endif %}
+    </ul>
+</div>
+
+<!-- 邮件配置说明 -->
+{% if is_mock_mode %}
+<div class="card" style="background: #fef2f2; border: 1px solid #fecaca;">
+    <h4 style="color: #991b1b; margin-bottom: 0.75rem;">⚙️ 如何启用真实邮件发送</h4>
+    <p style="color: #7f1d1d; margin-bottom: 1rem;">
+        请在项目根目录的 <code>.env</code> 文件中添加以下配置：
+    </p>
+    <pre style="background: #fee2e2; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; color: #7f1d1d;">EMAIL_SMTP_HOST=smtp.qiye.aliyun.com
+EMAIL_SMTP_PORT=465
+EMAIL_SENDER=cooperate@topuplive.com
+EMAIL_PASSWORD=your_password</pre>
+    <p style="color: #7f1d1d; margin-top: 1rem; font-size: 0.9rem;">
+        配置完成后重启服务器即可启用真实邮件发送。
+    </p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 实时字数统计
+    document.querySelector('textarea[name="body"]').addEventListener('input', function() {
+        const text = this.value;
+        const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
+        document.getElementById('wordCount').textContent = wordCount;
+    });
+</script>
+{% endblock %}
