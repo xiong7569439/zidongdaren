@@ -1230,4 +1230,6 @@ if __name__ == "__main__":
     
     print("=" * 80)
     
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    # 生产环境关闭 debug 模式，避免 Flask 启动两个进程导致邮件工具初始化问题
+    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    app.run(host="0.0.0.0", port=5000, debug=debug_mode)
