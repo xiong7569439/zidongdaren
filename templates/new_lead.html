@@ -1,47 +1,95 @@
 {% extends "base.html" %}
 
-{% block title %}新建线索 - YouTube网红曝光合作系统{% endblock %}
+{% block title %}新建线索 - KOL Nexus{% endblock %}
+{% block page_title %}新建线索{% endblock %}
 
 {% block content %}
-<div class="card" style="max-width: 600px; margin: 0 auto;">
-    <h2>➕ 创建新线索</h2>
+<div class="max-w-2xl mx-auto">
+    <!-- Form Card -->
+    <div class="glass rounded-2xl p-8 border border-zinc-800">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 rounded-xl gradient-indigo flex items-center justify-center">
+                <i data-lucide="plus" class="w-6 h-6 text-white"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-semibold">创建新线索</h2>
+                <p class="text-sm text-zinc-500">添加新的 YouTube 创作者到线索库</p>
+            </div>
+        </div>
+        
+        <form method="POST" action="{{ url_for('new_lead') }}" class="space-y-6">
+            <div>
+                <label for="channel_url" class="block text-sm font-medium text-zinc-300 mb-2">
+                    YouTube 频道 URL <span class="text-rose-400">*</span>
+                </label>
+                <div class="relative">
+                    <i data-lucide="youtube" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500"></i>
+                    <input type="url" 
+                           id="channel_url" 
+                           name="channel_url" 
+                           class="form-control-dark w-full pl-12 pr-4 py-3 rounded-xl" 
+                           placeholder="https://www.youtube.com/@channelname"
+                           required>
+                </div>
+                <p class="text-xs text-zinc-500 mt-2">
+                    支持格式: https://www.youtube.com/@username 或 https://www.youtube.com/c/channelname
+                </p>
+            </div>
+            
+            <div>
+                <label for="creator_name" class="block text-sm font-medium text-zinc-300 mb-2">
+                    创作者名称 <span class="text-zinc-500">（可选）</span>
+                </label>
+                <div class="relative">
+                    <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500"></i>
+                    <input type="text" 
+                           id="creator_name" 
+                           name="creator_name" 
+                           class="form-control-dark w-full pl-12 pr-4 py-3 rounded-xl" 
+                           placeholder="如果留空，系统将自动获取">
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-4 pt-4">
+                <button type="submit" class="btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium">
+                    <i data-lucide="plus" class="w-5 h-5"></i>
+                    创建线索
+                </button>
+                <a href="{{ url_for('leads') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors border border-zinc-700">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                    取消
+                </a>
+            </div>
+        </form>
+    </div>
     
-    <form method="POST" action="{{ url_for('new_lead') }}" style="margin-top: 1.5rem;">
-        <div class="form-group">
-            <label for="channel_url">YouTube频道URL *</label>
-            <input type="url" 
-                   id="channel_url" 
-                   name="channel_url" 
-                   class="form-control" 
-                   placeholder="https://www.youtube.com/@channelname"
-                   required>
-            <small style="color: #666; margin-top: 0.5rem; display: block;">
-                支持格式: https://www.youtube.com/@username 或 https://www.youtube.com/c/channelname
-            </small>
+    <!-- Tips Card -->
+    <div class="glass rounded-2xl p-6 border border-zinc-800 mt-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+                <i data-lucide="lightbulb" class="w-5 h-5 text-amber-400"></i>
+            </div>
+            <h3 class="text-lg font-semibold">提示</h3>
         </div>
         
-        <div class="form-group">
-            <label for="creator_name">创作者名称（可选）</label>
-            <input type="text" 
-                   id="creator_name" 
-                   name="creator_name" 
-                   class="form-control" 
-                   placeholder="如果留空，系统将自动获取">
-        </div>
-        
-        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-            <button type="submit" class="btn btn-primary">创建线索</button>
-            <a href="{{ url_for('leads') }}" class="btn btn-secondary">取消</a>
-        </div>
-    </form>
+        <ul class="space-y-3">
+            <li class="flex items-start gap-3 text-sm text-zinc-400">
+                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5"></i>
+                <span>如果配置了 YouTube API，创建后会自动执行数据采集</span>
+            </li>
+            <li class="flex items-start gap-3 text-sm text-zinc-400">
+                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5"></i>
+                <span>创作者名称可以留空，系统会自动从 YouTube 获取</span>
+            </li>
+            <li class="flex items-start gap-3 text-sm text-zinc-400">
+                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5"></i>
+                <span>确保 URL 格式正确，以 https://www.youtube.com/ 开头</span>
+            </li>
+        </ul>
+    </div>
 </div>
 
-<div class="card" style="max-width: 600px; margin: 1.5rem auto 0;">
-    <h3>💡 提示</h3>
-    <ul style="margin-top: 1rem; padding-left: 1.5rem; color: #666;">
-        <li>如果配置了YouTube API，创建后会自动执行数据采集</li>
-        <li>创作者名称可以留空，系统会自动从YouTube获取</li>
-        <li>确保URL格式正确，以 https://www.youtube.com/ 开头</li>
-    </ul>
-</div>
+<script>
+    lucide.createIcons();
+</script>
 {% endblock %}

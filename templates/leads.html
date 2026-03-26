@@ -1,268 +1,105 @@
 {% extends "base.html" %}
 
-{% block title %}线索管理 - YouTube网红曝光合作系统{% endblock %}
+{% block title %}线索管理 - KOL Nexus{% endblock %}
+{% block page_title %}线索管理{% endblock %}
 
 {% block extra_css %}
 <style>
-    .kol-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-        gap: 1.5rem;
-    }
-    
     .kol-card {
-        background: white;
-        border-radius: 16px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        transition: transform 0.2s, box-shadow 0.2s;
-        border: 1px solid #e5e7eb;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .kol-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    }
-    
-    .kol-header {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-    
-    .kol-avatar {
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid #f3f4f6;
-    }
-    
-    .kol-avatar-placeholder {
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.5rem;
-        font-weight: 600;
-    }
-    
-    .kol-info {
-        flex: 1;
-        min-width: 0;
-    }
-    
-    .kol-name {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #111;
-        margin-bottom: 0.25rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    
-    .kol-handle {
-        font-size: 0.85rem;
-        color: #666;
-        margin-bottom: 0.5rem;
-    }
-    
-    .kol-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.4rem;
-        margin-bottom: 0.75rem;
-    }
-    
-    .kol-tag {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-        padding: 0.25rem 0.6rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 500;
-    }
-    
-    .tag-game {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-    
-    .tag-status {
-        background: #d1fae5;
-        color: #065f46;
-    }
-    
-    .tag-lang {
-        background: #fce7f3;
-        color: #9d174d;
-    }
-    
-    .tag-sponsor {
-        background: #fef3c7;
-        color: #92400e;
-    }
-    
-    .kol-stats {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.75rem;
-        margin-bottom: 1rem;
-        padding: 0.75rem;
-        background: #f9fafb;
-        border-radius: 12px;
-    }
-    
-    .kol-stat {
-        text-align: center;
-    }
-    
-    .kol-stat-value {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #667eea;
-    }
-    
-    .kol-stat-label {
-        font-size: 0.7rem;
-        color: #666;
-        margin-top: 0.1rem;
-    }
-    
-    .kol-socials {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+        border-color: rgba(99, 102, 241, 0.3);
     }
     
     .social-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.4rem 0.75rem;
-        border-radius: 8px;
-        font-size: 0.8rem;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-    
-    .social-youtube {
-        background: #fee2e2;
-        color: #dc2626;
-    }
-    
-    .social-twitch {
-        background: #f3e8ff;
-        color: #9333ea;
-    }
-    
-    .social-twitter {
-        background: #dbeafe;
-        color: #2563eb;
-    }
-    
-    .social-discord {
-        background: #e0e7ff;
-        color: #4f46e5;
-    }
-    
-    .social-email {
-        background: #d1fae5;
-        color: #059669;
+        transition: all 0.2s ease;
     }
     
     .social-link:hover {
         transform: scale(1.05);
     }
-    
-    .kol-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 0.75rem;
-        border-top: 1px solid #e5e7eb;
-    }
-    
-    .kol-stage {
-        font-size: 0.8rem;
-        color: #666;
-    }
-    
-    .view-btn {
-        padding: 0.5rem 1rem;
-        font-size: 0.85rem;
-    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-    <h2>📋 线索管理</h2>
-    <a href="{{ url_for('new_lead') }}" class="btn btn-primary">➕ 新建线索</a>
+<!-- Header Actions -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
+        <p class="text-zinc-400 text-sm mt-1">管理你的 YouTube 网红合作线索</p>
+    </div>
+    <a href="{{ url_for('new_lead') }}" class="btn-primary inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        新建线索
+    </a>
 </div>
 
 {% if leads %}
-<div class="kol-grid">
+<!-- Leads Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
     {% for lead in leads %}
-    <div class="kol-card">
-        <!-- 头部信息 -->
-        <div class="kol-header">
+    <div class="kol-card glass rounded-2xl p-5 border border-zinc-800 relative overflow-hidden group">
+        <!-- Decorative gradient -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        
+        <!-- Header -->
+        <div class="flex gap-4 mb-4 relative">
             {% if lead.thumbnail %}
-            <img src="{{ lead.thumbnail }}" alt="{{ lead.creator_name }}" class="kol-avatar">
+            <img src="{{ lead.thumbnail }}" alt="{{ lead.creator_name }}" class="w-16 h-16 rounded-2xl object-cover border-2 border-zinc-700 shadow-lg">
             {% else %}
-            <div class="kol-avatar-placeholder">{{ lead.creator_name[0] if lead.creator_name else '?' }}</div>
+            <div class="w-16 h-16 rounded-2xl gradient-indigo flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                {{ lead.creator_name[0] if lead.creator_name else '?' }}
+            </div>
             {% endif %}
-            <div class="kol-info">
-                <div class="kol-name">{{ lead.creator_name }}</div>
-                <div class="kol-handle">{{ lead.custom_url or lead.channel_url.split('/')[-1] }}</div>
-                <div class="kol-tags">
+            <div class="flex-1 min-w-0">
+                <h3 class="font-semibold text-zinc-50 truncate">{{ lead.creator_name }}</h3>
+                <p class="text-sm text-zinc-500 truncate">@{{ lead.custom_url or lead.channel_url.split('/')[-1] }}</p>
+                <div class="flex flex-wrap gap-1.5 mt-2">
                     {% if lead.game_focus %}
                         {% for game in lead.game_focus[:2] %}
-                        <span class="kol-tag tag-game">{{ game }}</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                            {{ game }}
+                        </span>
                         {% endfor %}
                     {% endif %}
                     {% if lead.country %}
-                    <span class="kol-tag tag-lang">{{ lead.country }}</span>
-                    {% endif %}
-                    {% if lead.sponsor_status %}
-                    <span class="kol-tag tag-sponsor">{{ lead.sponsor_status }}</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-zinc-800 text-zinc-400 border border-zinc-700">
+                        {{ lead.country }}
+                    </span>
                     {% endif %}
                 </div>
             </div>
         </div>
         
-        <!-- 数据统计 -->
-        <div class="kol-stats">
-            <div class="kol-stat">
-                <div class="kol-stat-value">{{ lead.subscriber_display or '-' }}</div>
-                <div class="kol-stat-label">Subscribers</div>
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-2 mb-4">
+            <div class="p-3 rounded-xl bg-zinc-900/50 border border-zinc-800 text-center">
+                <div class="text-lg font-bold text-indigo-400">{{ lead.subscriber_display or '-' }}</div>
+                <div class="text-xs text-zinc-500 mt-0.5">订阅</div>
             </div>
-            <div class="kol-stat">
-                <div class="kol-stat-value">{{ lead.video_count_display or '-' }}</div>
-                <div class="kol-stat-label">Videos</div>
+            <div class="p-3 rounded-xl bg-zinc-900/50 border border-zinc-800 text-center">
+                <div class="text-lg font-bold text-indigo-400">{{ lead.video_count_display or '-' }}</div>
+                <div class="text-xs text-zinc-500 mt-0.5">视频</div>
             </div>
-            <div class="kol-stat">
-                <div class="kol-stat-value">{{ lead.avg_views_display or '-' }}</div>
-                <div class="kol-stat-label">Avg Views</div>
+            <div class="p-3 rounded-xl bg-zinc-900/50 border border-zinc-800 text-center">
+                <div class="text-lg font-bold text-indigo-400">{{ lead.avg_views_display or '-' }}</div>
+                <div class="text-xs text-zinc-500 mt-0.5">均播</div>
             </div>
         </div>
         
-        <!-- About邮箱快捷显示 -->
+        <!-- Email Alert -->
         {% if lead.about_emails %}
-        <div style="margin-top: 0.75rem; padding: 0.5rem; background: #fef3c7; border-radius: 6px; border: 1px solid #f59e0b;">
-            <div style="font-size: 0.75rem; color: #92400e; margin-bottom: 0.25rem; font-weight: 600;">
-                📧 Email found in About:
+        <div class="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+            <div class="flex items-center gap-2 text-amber-400 text-xs font-medium mb-1">
+                <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                发现邮箱
             </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+            <div class="flex flex-wrap gap-1">
                 {% for email in lead.about_emails[:2] %}
-                <a href="mailto:{{ email }}" style="font-size: 0.8rem; color: #d97706; text-decoration: none; font-weight: 500;">
+                <a href="mailto:{{ email }}" class="text-xs text-amber-300 hover:text-amber-200 transition-colors truncate">
                     {{ email }}
                 </a>
                 {% endfor %}
@@ -270,17 +107,29 @@
         </div>
         {% endif %}
         
-        <!-- 社交链接 -->
+        <!-- Social Links -->
         {% if lead.social_links %}
-        <div class="kol-socials">
-            {% for link in lead.social_links %}
-            <a href="{{ link.url }}" target="_blank" class="social-link social-{{ link.type }}">
-                {% if link.type == 'youtube' %}▶️
-                {% elif link.type == 'twitch' %}💜
-                {% elif link.type == 'twitter' %}🐦
-                {% elif link.type == 'discord' %}💬
-                {% elif link.type == 'email' %}📧
-                {% else %}🔗
+        <div class="flex flex-wrap gap-2 mb-4">
+            {% for link in lead.social_links[:4] %}
+            <a href="{{ link.url }}" target="_blank" class="social-link inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium
+                {% if link.type == 'youtube' %}bg-rose-500/10 text-rose-400 border border-rose-500/20
+                {% elif link.type == 'twitch' %}bg-purple-500/10 text-purple-400 border border-purple-500/20
+                {% elif link.type == 'twitter' %}bg-sky-500/10 text-sky-400 border border-sky-500/20
+                {% elif link.type == 'discord' %}bg-indigo-500/10 text-indigo-400 border border-indigo-500/20
+                {% elif link.type == 'email' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20
+                {% else %}bg-zinc-800 text-zinc-400 border border-zinc-700{% endif %}">
+                {% if link.type == 'youtube' %}
+                <i data-lucide="youtube" class="w-3.5 h-3.5"></i>
+                {% elif link.type == 'twitch' %}
+                <i data-lucide="twitch" class="w-3.5 h-3.5"></i>
+                {% elif link.type == 'twitter' %}
+                <i data-lucide="twitter" class="w-3.5 h-3.5"></i>
+                {% elif link.type == 'discord' %}
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                {% elif link.type == 'email' %}
+                <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                {% else %}
+                <i data-lucide="link" class="w-3.5 h-3.5"></i>
                 {% endif %}
                 {{ link.label }}
             </a>
@@ -288,24 +137,36 @@
         </div>
         {% endif %}
         
-        <!-- 底部信息 -->
-        <div class="kol-footer">
-            <span class="kol-stage">{{ lead.stage_display }}</span>
-            <a href="{{ url_for('lead_detail', channel_url=lead.channel_url) }}" class="btn btn-secondary view-btn">
-                查看详情 →
+        <!-- Footer -->
+        <div class="flex items-center justify-between pt-4 border-t border-zinc-800">
+            <span class="text-xs text-zinc-500 flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full {{ 'bg-emerald-500' if 'closed_won' in lead.current_stage else 'bg-amber-500' if 'negotiating' in lead.current_stage or 'outreach' in lead.current_stage else 'bg-zinc-500' }}"></span>
+                {{ lead.stage_display }}
+            </span>
+            <a href="{{ url_for('lead_detail', channel_url=lead.channel_url) }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-zinc-50 transition-all border border-zinc-700">
+                查看详情
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
             </a>
         </div>
     </div>
     {% endfor %}
 </div>
 {% else %}
-<div class="card" style="text-align: center; padding: 4rem;">
-    <div style="font-size: 4rem; margin-bottom: 1rem;">📭</div>
-    <h3 style="color: #666; margin-bottom: 0.5rem;">暂无线索</h3>
-    <p style="color: #999; margin-bottom: 1.5rem;">开始添加YouTube创作者，管理你的合作线索</p>
-    <a href="{{ url_for('new_lead') }}" class="btn btn-primary">
+<!-- Empty State -->
+<div class="glass rounded-2xl p-12 text-center border border-zinc-800">
+    <div class="w-20 h-20 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto mb-6">
+        <i data-lucide="inbox" class="w-10 h-10 text-zinc-600"></i>
+    </div>
+    <h3 class="text-xl font-semibold text-zinc-300 mb-2">暂无线索</h3>
+    <p class="text-zinc-500 mb-6 max-w-sm mx-auto">开始添加 YouTube 创作者，管理你的合作线索，追踪合作进度</p>
+    <a href="{{ url_for('new_lead') }}" class="btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium">
+        <i data-lucide="plus" class="w-5 h-5"></i>
         创建第一个线索
     </a>
 </div>
 {% endif %}
+
+<script>
+    lucide.createIcons();
+</script>
 {% endblock %}

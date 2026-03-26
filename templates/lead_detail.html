@@ -1,47 +1,83 @@
 {% extends "base.html" %}
 
 {% block title %}{{ context.creator_name }} - 线索详情{% endblock %}
+{% block page_title %}{{ context.creator_name }}{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-    <div>
-        <h2>{{ context.creator_name }}</h2>
-        <div style="color: #666; margin-top: 0.25rem;">
-            <a href="{{ context.channel_url }}" target="_blank" style="color: #667eea;">
-                {{ context.channel_url }}
-            </a>
+<!-- Header -->
+<div class="mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <a href="{{ context.channel_url }}" target="_blank" class="text-zinc-400 hover:text-indigo-400 transition-colors flex items-center gap-2 text-sm">
+                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                    {{ context.channel_url }}
+                </a>
+            </div>
         </div>
-    </div>
-    <div style="text-align: right;">
-        <div style="font-size: 1.25rem; font-weight: 600;">{{ stage_display }}</div>
-        <div style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">
-            创建于 {{ context.created_at.strftime("%Y-%m-%d %H:%M") }}
+        <div class="flex items-center gap-4">
+            <div class="text-right">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium
+                    {% if 'closed_won' in context.current_stage.value %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20
+                    {% elif 'closed_lost' in context.current_stage.value %}bg-rose-500/10 text-rose-400 border border-rose-500/20
+                    {% elif 'negotiating' in context.current_stage.value or 'outreach' in context.current_stage.value %}bg-amber-500/10 text-amber-400 border border-amber-500/20
+                    {% else %}bg-indigo-500/10 text-indigo-400 border border-indigo-500/20{% endif %}">
+                    <span class="w-2 h-2 rounded-full 
+                        {% if 'closed_won' in context.current_stage.value %}bg-emerald-500
+                        {% elif 'closed_lost' in context.current_stage.value %}bg-rose-500
+                        {% elif 'negotiating' in context.current_stage.value or 'outreach' in context.current_stage.value %}bg-amber-500
+                        {% else %}bg-indigo-500{% endif %}">
+                    </span>
+                    {{ stage_display }}
+                </div>
+            </div>
+            <div class="text-xs text-zinc-500">
+                创建于 {{ context.created_at.strftime("%Y-%m-%d %H:%M") }}
+            </div>
         </div>
     </div>
 </div>
 
-<!-- 可用操作 -->
+<!-- Available Actions -->
 {% if available_actions %}
-<div class="card">
-    <h3>🚀 可用操作</h3>
-    <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
+<div class="glass rounded-2xl p-6 border border-zinc-800 mb-8">
+    <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+            <i data-lucide="zap" class="w-5 h-5 text-indigo-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold">可用操作</h3>
+    </div>
+    
+    <div class="flex flex-wrap gap-3">
         {% for action in available_actions %}
-        <form method="POST" action="{{ action.url }}" style="display: inline;">
+        <form method="POST" action="{{ action.url }}" class="inline-flex">
             {% if action.name == 'send_email' %}
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <input type="text" name="game_name" placeholder="游戏名称" class="form-control" style="width: 150px;" required>
-                <button type="submit" class="btn btn-primary">{{ action.label }}</button>
+            <div class="flex items-center gap-2 p-2 rounded-xl bg-zinc-900/50 border border-zinc-800">
+                <input type="text" name="game_name" placeholder="游戏名称" class="form-control-dark px-3 py-2 rounded-lg text-sm w-32" required>
+                <button type="submit" class="btn-primary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    {{ action.label }}
+                </button>
                 {% if email_mock_mode is defined and email_mock_mode %}
-                <span style="font-size: 0.75rem; color: #f59e0b; margin-left: 0.5rem;">⚠️ 模拟模式</span>
+                <span class="text-xs text-amber-400 flex items-center gap-1">
+                    <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                    模拟模式
+                </span>
                 {% endif %}
             </div>
             {% elif action.name == 'handle_reply' %}
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <textarea name="raw_reply" placeholder="输入收到的回复内容..." class="form-control" style="width: 300px; height: 60px;" required></textarea>
-                <button type="submit" class="btn btn-primary">{{ action.label }}</button>
+            <div class="flex items-center gap-2 p-2 rounded-xl bg-zinc-900/50 border border-zinc-800 w-full">
+                <textarea name="raw_reply" placeholder="输入收到的回复内容..." class="form-control-dark px-3 py-2 rounded-lg text-sm flex-1 min-w-[300px] h-16 resize-none" required></textarea>
+                <button type="submit" class="btn-primary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                    <i data-lucide="message-square" class="w-4 h-4"></i>
+                    {{ action.label }}
+                </button>
             </div>
             {% else %}
-            <button type="submit" class="btn btn-primary">{{ action.label }}</button>
+            <button type="submit" class="btn-primary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                <i data-lucide="play" class="w-4 h-4"></i>
+                {{ action.label }}
+            </button>
             {% endif %}
         </form>
         {% endfor %}
@@ -49,117 +85,74 @@
 </div>
 {% endif %}
 
-<!-- 创作者画像 -->
+<!-- Creator Profile -->
 {% if creator_profile %}
-<div class="card">
-    <h3>👤 创作者画像</h3>
+<div class="glass rounded-2xl p-6 border border-zinc-800 mb-8">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+            <i data-lucide="user" class="w-5 h-5 text-indigo-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold">创作者画像</h3>
+    </div>
     
-    <!-- 基本信息 -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
-        <div style="padding: 1rem; background: #f9fafb; border-radius: 8px;">
-            <div style="font-size: 0.8rem; color: #666;">订阅数</div>
-            <div style="font-size: 1.5rem; font-weight: 600; color: #667eea;">
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+            <div class="text-xs text-zinc-500 mb-1">订阅数</div>
+            <div class="text-xl font-bold gradient-text">
                 {{ "{:,}".format(creator_profile.subscriber_count) if creator_profile.subscriber_count else "N/A" }}
             </div>
         </div>
-        <div style="padding: 1rem; background: #f9fafb; border-radius: 8px;">
-            <div style="font-size: 0.8rem; color: #666;">总播放量</div>
-            <div style="font-size: 1.5rem; font-weight: 600; color: #667eea;">
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+            <div class="text-xs text-zinc-500 mb-1">总播放量</div>
+            <div class="text-xl font-bold gradient-text">
                 {{ "{:,}".format(creator_profile.total_view_count) if creator_profile.total_view_count else "N/A" }}
             </div>
         </div>
-        <div style="padding: 1rem; background: #f9fafb; border-radius: 8px;">
-            <div style="font-size: 0.8rem; color: #666;">视频数</div>
-            <div style="font-size: 1.5rem; font-weight: 600; color: #667eea;">
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+            <div class="text-xs text-zinc-500 mb-1">视频数</div>
+            <div class="text-xl font-bold gradient-text">
                 {{ "{:,}".format(creator_profile.total_video_count) if creator_profile.total_video_count else "N/A" }}
             </div>
         </div>
-        <div style="padding: 1rem; background: #f9fafb; border-radius: 8px;">
-            <div style="font-size: 0.8rem; color: #666;">基线播放量</div>
-            <div style="font-size: 1.5rem; font-weight: 600; color: #667eea;">
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+            <div class="text-xs text-zinc-500 mb-1">基线播放量</div>
+            <div class="text-xl font-bold gradient-text">
                 {{ "{:,.0f}".format(creator_profile.recent_metrics.baseline_views) if creator_profile.recent_metrics else "N/A" }}
             </div>
         </div>
     </div>
     
-    <!-- About页面完整说明 -->
+    <!-- About Description -->
     {% if creator_profile.about_description %}
-    <div style="margin-top: 1.5rem;">
-        <h4 style="font-size: 1rem; margin-bottom: 0.75rem;">📝 About Description</h4>
-        <div style="padding: 1rem; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #0ea5e9;">
-            <div style="color: #334155; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;">{{ creator_profile.about_description }}</div>
+    <div class="mb-6">
+        <h4 class="text-sm font-medium text-zinc-400 mb-3 flex items-center gap-2">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            About Description
+        </h4>
+        <div class="p-4 rounded-xl bg-sky-500/5 border border-sky-500/20">
+            <div class="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">{{ creator_profile.about_description }}</div>
         </div>
         
-        <!-- About中发现的邮箱地址 -->
         {% if creator_profile.about_emails %}
-        <div style="margin-top: 1rem; padding: 1rem; background: #fef3c7; border-radius: 8px; border: 1px solid #f59e0b;">
-            <div style="font-size: 0.85rem; color: #92400e; margin-bottom: 0.75rem; font-weight: 600;">
-                📧 Email addresses found in About section:
+        <div class="mt-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+            <div class="text-sm font-medium text-amber-400 mb-3 flex items-center gap-2">
+                <i data-lucide="mail" class="w-4 h-4"></i>
+                发现邮箱地址
             </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+            <div class="flex flex-wrap gap-3">
                 {% for email in creator_profile.about_emails %}
-                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                    <!-- 使用系统邮件工具发送 -->
-                    <form method="POST" action="/leads/{{ context.channel_url }}/send_email" style="display: inline;">
+                <div class="flex items-center gap-2">
+                    <form method="POST" action="/leads/{{ context.channel_url }}/send_email" class="inline-flex">
                         <input type="hidden" name="game_name" value="Our Game">
                         <input type="hidden" name="use_email" value="{{ email }}">
-                        <button type="submit" 
-                                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3); cursor: pointer;"
-                                onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 8px rgba(245, 158, 11, 0.4)'" 
-                                onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 4px rgba(245, 158, 11, 0.3)'">
-                            <span>📧</span>
-                            <span>{{ email }}</span>
-                            <span style="font-size: 0.75rem; opacity: 0.9; margin-left: 0.5rem;">(Click to send via system)</span>
+                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium hover:shadow-lg hover:shadow-amber-500/25 transition-all">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            {{ email }}
                         </button>
                     </form>
-                    <!-- 复制邮箱地址 -->
-                    <button type="button" 
-                            onclick="navigator.clipboard.writeText('{{ email }}').then(() => { this.innerText='✅ 已复制!'; setTimeout(() => this.innerText='📋 复制邮箱', 2000); })"
-                            style="font-size: 0.8rem; color: #92400e; text-decoration: underline; background: none; border: none; cursor: pointer; padding: 0;"
-                            title="复制邮箱地址到剪贴板">
-                        📋 复制邮箱
-                    </button>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-    </div>
-    {% elif creator_profile.description %}
-    <div style="margin-top: 1.5rem;">
-        <h4 style="font-size: 1rem; margin-bottom: 0.75rem;">📝 Channel Description</h4>
-        <div style="padding: 1rem; background: #f9fafb; border-radius: 8px;">
-            <div style="color: #444; font-size: 0.9rem; line-height: 1.6;">{{ creator_profile.description }}</div>
-        </div>
-        
-        <!-- 描述中发现的邮箱地址 -->
-        {% if creator_profile.about_emails %}
-        <div style="margin-top: 1rem; padding: 1rem; background: #fef3c7; border-radius: 8px; border: 1px solid #f59e0b;">
-            <div style="font-size: 0.85rem; color: #92400e; margin-bottom: 0.75rem; font-weight: 600;">
-                📧 Email addresses found in description:
-            </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
-                {% for email in creator_profile.about_emails %}
-                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                    <!-- 使用系统邮件工具发送 -->
-                    <form method="POST" action="/leads/{{ context.channel_url }}/send_email" style="display: inline;">
-                        <input type="hidden" name="game_name" value="Our Game">
-                        <input type="hidden" name="use_email" value="{{ email }}">
-                        <button type="submit" 
-                                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3); cursor: pointer;"
-                                onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 8px rgba(245, 158, 11, 0.4)'" 
-                                onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 4px rgba(245, 158, 11, 0.3)'">
-                            <span>📧</span>
-                            <span>{{ email }}</span>
-                            <span style="font-size: 0.75rem; opacity: 0.9; margin-left: 0.5rem;">(Click to send via system)</span>
-                        </button>
-                    </form>
-                    <!-- 复制邮箱地址 -->
-                    <button type="button" 
-                            onclick="navigator.clipboard.writeText('{{ email }}').then(() => { this.innerText='✅ 已复制!'; setTimeout(() => this.innerText='📋 复制邮箱', 2000); })"
-                            style="font-size: 0.8rem; color: #92400e; text-decoration: underline; background: none; border: none; cursor: pointer; padding: 0;"
-                            title="复制邮箱地址到剪贴板">
-                        📋 复制邮箱
+                    <button type="button" onclick="copyEmail('{{ email }}', this)" class="text-xs text-amber-400 hover:text-amber-300 underline">
+                        复制
                     </button>
                 </div>
                 {% endfor %}
@@ -169,40 +162,50 @@
     </div>
     {% endif %}
     
-    <!-- About页面链接 -->
+    <!-- External Links -->
     {% if creator_profile.about_links %}
-    <div style="margin-top: 1.5rem;">
-        <h4 style="font-size: 1rem; margin-bottom: 0.75rem;">🔗 External Links</h4>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+    <div class="mb-6">
+        <h4 class="text-sm font-medium text-zinc-400 mb-3 flex items-center gap-2">
+            <i data-lucide="link" class="w-4 h-4"></i>
+            External Links
+        </h4>
+        <div class="flex flex-wrap gap-2">
             {% for link in creator_profile.about_links %}
-            <a href="{{ link.url }}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; background: white; border: 1px solid #e5e7eb; border-radius: 8px; text-decoration: none; color: #374151; transition: all 0.2s;" onmouseover="this.style.background='#f9fafb';this.style.borderColor='#667eea'" onmouseout="this.style.background='white';this.style.borderColor='#e5e7eb'">
-                <span style="font-size: 1.2rem;">
-                    {% if link.type == 'twitter' %}🐦
-                    {% elif link.type == 'instagram' %}📷
-                    {% elif link.type == 'twitch' %}💜
-                    {% elif link.type == 'discord' %}💬
-                    {% elif link.type == 'tiktok' %}🎵
-                    {% elif link.type == 'facebook' %}📘
-                    {% elif link.type == 'linktree' %}🌳
-                    {% elif link.type == 'github' %}💻
-                    {% elif link.type == 'email' %}📧
-                    {% else %}🔗
-                    {% endif %}
-                </span>
-                <span style="font-weight: 500;">{{ link.title or link.url }}</span>
+            <a href="{{ link.url }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm hover:bg-zinc-700 hover:border-indigo-500/30 transition-all">
+                {% if link.type == 'twitter' %}
+                <i data-lucide="twitter" class="w-4 h-4 text-sky-400"></i>
+                {% elif link.type == 'instagram' %}
+                <i data-lucide="instagram" class="w-4 h-4 text-pink-400"></i>
+                {% elif link.type == 'twitch' %}
+                <i data-lucide="twitch" class="w-4 h-4 text-purple-400"></i>
+                {% elif link.type == 'discord' %}
+                <i data-lucide="message-circle" class="w-4 h-4 text-indigo-400"></i>
+                {% elif link.type == 'tiktok' %}
+                <i data-lucide="music" class="w-4 h-4 text-zinc-300"></i>
+                {% elif link.type == 'github' %}
+                <i data-lucide="github" class="w-4 h-4 text-zinc-300"></i>
+                {% else %}
+                <i data-lucide="link" class="w-4 h-4 text-zinc-400"></i>
+                {% endif %}
+                {{ link.title or link.url }}
             </a>
             {% endfor %}
         </div>
     </div>
     {% endif %}
     
-    <!-- 内容焦点标签 -->
+    <!-- Content Focus -->
     {% if creator_profile.content_focus %}
-    <div style="margin-top: 1.5rem;">
-        <h4 style="font-size: 1rem; margin-bottom: 0.75rem;">🏷️ 内容焦点</h4>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+    <div>
+        <h4 class="text-sm font-medium text-zinc-400 mb-3 flex items-center gap-2">
+            <i data-lucide="tag" class="w-4 h-4"></i>
+            内容焦点
+        </h4>
+        <div class="flex flex-wrap gap-2">
             {% for focus in creator_profile.content_focus %}
-            <span style="padding: 0.4rem 0.8rem; background: #dbeafe; color: #1e40af; border-radius: 20px; font-size: 0.85rem; font-weight: 500;">{{ focus }}</span>
+            <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 text-sm font-medium border border-indigo-500/20">
+                {{ focus }}
+            </span>
             {% endfor %}
         </div>
     </div>
@@ -210,31 +213,54 @@
 </div>
 {% endif %}
 
-<!-- 报价卡 -->
+<script>
+function copyEmail(email, btn) {
+    navigator.clipboard.writeText(email).then(() => {
+        const originalText = btn.innerText;
+        btn.innerText = '已复制!';
+        btn.classList.add('text-emerald-400');
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.classList.remove('text-emerald-400');
+        }, 2000);
+    });
+}
+</script>
+
+<!-- Pricing Card -->
 {% if pricing_card %}
-<div class="card">
-    <h3>💰 报价卡</h3>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
-        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
-            <div style="font-size: 0.8rem; opacity: 0.9;">开价 (Anchor)</div>
-            <div style="font-size: 2rem; font-weight: 700; margin-top: 0.5rem;">${{ pricing_card.anchor_price }}</div>
+<div class="glass rounded-2xl p-6 border border-zinc-800 mb-8">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+            <i data-lucide="banknote" class="w-5 h-5 text-emerald-400"></i>
         </div>
-        <div style="text-align: center; padding: 1.5rem; background: #10b981; color: white; border-radius: 8px;">
-            <div style="font-size: 0.8rem; opacity: 0.9;">目标 (Target)</div>
-            <div style="font-size: 2rem; font-weight: 700; margin-top: 0.5rem;">${{ pricing_card.target_price }}</div>
+        <h3 class="text-lg font-semibold">报价卡</h3>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="p-6 rounded-2xl gradient-indigo text-center">
+            <div class="text-sm text-white/70 mb-2">开价 (Anchor)</div>
+            <div class="text-3xl font-bold text-white">${{ pricing_card.anchor_price }}</div>
         </div>
-        <div style="text-align: center; padding: 1.5rem; background: #f59e0b; color: white; border-radius: 8px;">
-            <div style="font-size: 0.8rem; opacity: 0.9;">底价 (Floor)</div>
-            <div style="font-size: 2rem; font-weight: 700; margin-top: 0.5rem;">${{ pricing_card.floor_price }}</div>
+        <div class="p-6 rounded-2xl gradient-emerald text-center">
+            <div class="text-sm text-white/70 mb-2">目标 (Target)</div>
+            <div class="text-3xl font-bold text-white">${{ pricing_card.target_price }}</div>
+        </div>
+        <div class="p-6 rounded-2xl gradient-amber text-center">
+            <div class="text-sm text-white/70 mb-2">底价 (Floor)</div>
+            <div class="text-3xl font-bold text-white">${{ pricing_card.floor_price }}</div>
         </div>
     </div>
     
     {% if pricing_card.deliverables %}
-    <div style="margin-top: 1.5rem;">
-        <h4 style="font-size: 1rem; margin-bottom: 0.75rem;">交付清单</h4>
-        <ul style="padding-left: 1.5rem; color: #444;">
+    <div>
+        <h4 class="text-sm font-medium text-zinc-400 mb-3">交付清单</h4>
+        <ul class="space-y-2">
             {% for item in pricing_card.deliverables %}
-            <li style="margin-bottom: 0.5rem;">{{ item }}</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-300">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0"></i>
+                {{ item }}
+            </li>
             {% endfor %}
         </ul>
     </div>
@@ -242,91 +268,130 @@
 </div>
 {% endif %}
 
-<!-- 联系方式 -->
+<!-- Contact Information -->
 {% if contact_candidates %}
-<div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3>📧 联系方式</h3>
-        <div style="display: flex; gap: 0.5rem;">
-            <form method="POST" action="/leads/{{ context.channel_url }}/validate_contacts" style="display:inline;">
-                <button type="submit" class="btn btn-secondary" style="font-size:0.8rem; padding:0.4rem 0.8rem;">🔍 验证邮箱</button>
+<div class="glass rounded-2xl p-6 border border-zinc-800 mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+                <i data-lucide="mail" class="w-5 h-5 text-indigo-400"></i>
+            </div>
+            <h3 class="text-lg font-semibold">联系方式</h3>
+        </div>
+        <div class="flex gap-2">
+            <form method="POST" action="/leads/{{ context.channel_url }}/validate_contacts" class="inline-flex">
+                <button type="submit" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800 text-zinc-300 text-sm hover:bg-zinc-700 transition-colors border border-zinc-700">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                    验证邮箱
+                </button>
             </form>
-            <form method="POST" action="/leads/{{ context.channel_url }}/refresh_contacts" style="display:inline;">
+            <form method="POST" action="/leads/{{ context.channel_url }}/refresh_contacts" class="inline-flex">
                 <input type="hidden" name="force" value="true">
-                <button type="submit" class="btn btn-secondary" style="font-size:0.8rem; padding:0.4rem 0.8rem;">🔄 刷新联系方式</button>
+                <button type="submit" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800 text-zinc-300 text-sm hover:bg-zinc-700 transition-colors border border-zinc-700">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    刷新
+                </button>
             </form>
         </div>
     </div>
     
-    <!-- 快速发送邮件按钮 -->
+    <!-- Recommended Contact -->
     {% if recommended_contact and (recommended_contact.type in ['email', 'business_email']) %}
-    <div style="margin-top: 1rem; padding: 1rem; background: #f0fdf4; border-radius: 8px; border: 1px solid #86efac;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
+    <div class="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-                <div style="font-weight: 600; color: #166534;">推荐联系方式: {{ recommended_contact.value }}</div>
-                <div style="font-size: 0.85rem; color: #15803d; margin-top: 0.25rem;">可靠度: {{ "%.0f"|format(recommended_contact.confidence * 100) if recommended_contact.confidence else 'N/A' }}%</div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400">推荐</span>
+                    <span class="text-sm font-medium text-emerald-400">{{ recommended_contact.value }}</span>
+                </div>
+                <div class="text-xs text-emerald-400/70">
+                    可靠度: {{ "%.0f"|format(recommended_contact.confidence * 100) if recommended_contact.confidence else 'N/A' }}%
+                </div>
             </div>
-            <form method="POST" action="/leads/{{ context.channel_url }}/send_email" style="display: flex; gap: 0.5rem; align-items: center;">
-                <input type="text" name="game_name" placeholder="游戏名称" class="form-control" style="width: 150px;" required>
-                <button type="submit" class="btn btn-success">📧 发送合作邮件</button>
+            <form method="POST" action="/leads/{{ context.channel_url }}/send_email" class="flex items-center gap-2">
+                <input type="text" name="game_name" placeholder="游戏名称" class="form-control-dark px-3 py-2 rounded-lg text-sm w-40" required>
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600 transition-colors">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    发送邮件
+                </button>
             </form>
         </div>
         {% if email_mock_mode is defined and email_mock_mode %}
-        <div style="margin-top: 0.75rem; padding: 0.5rem; background: #fef3c7; border-radius: 6px; font-size: 0.8rem; color: #92400e;">
-            ⚠️ 当前处于模拟模式，邮件不会实际发送。请在 .env 文件中配置 SMTP 以启用真实发送。
+        <div class="mt-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400 flex items-center gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            当前处于模拟模式，邮件不会实际发送。请在 .env 文件中配置 SMTP 以启用真实发送。
         </div>
         {% endif %}
     </div>
     {% endif %}
+    
     {% if context.contact_verification and context.contact_verification.last_update %}
-    <div style="font-size:0.75rem; color:#999; margin-top:0.25rem;">
+    <div class="text-xs text-zinc-500 mb-4">
         上次刷新: {{ context.contact_verification.last_update[:19] }}
     </div>
     {% endif %}
-    <div style="margin-top: 1rem;">
+    
+    <!-- Contact List -->
+    <div class="space-y-3">
         {% for contact in contact_candidates %}
-        <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f9fafb; border-radius: 8px; margin-bottom: 0.75rem;">
-            <span style="font-size: 1.5rem;">
-                {% if contact.type == 'email' or contact.type == 'business_email' %}📧
-                {% elif contact.type == 'twitter' or contact.type == 'social_dm' and 'twitter' in contact.value %}🐦
-                {% elif contact.type == 'instagram' or contact.type == 'social_dm' and 'instagram' in contact.value %}📷
-                {% elif contact.type == 'twitch' or contact.type == 'social_dm' and 'twitch' in contact.value %}💜
-                {% elif contact.type == 'discord' or contact.type == 'social_dm' and 'discord' in contact.value %}💬
-                {% elif contact.type == 'tiktok' %}🎵
-                {% elif contact.type == 'linktree' %}🌳
-                {% else %}🔗
+        <div class="flex items-center gap-4 p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+            <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                {% if contact.type in ['email', 'business_email'] %}
+                <i data-lucide="mail" class="w-5 h-5 text-emerald-400"></i>
+                {% elif contact.type == 'twitter' or 'twitter' in contact.value %}
+                <i data-lucide="twitter" class="w-5 h-5 text-sky-400"></i>
+                {% elif contact.type == 'instagram' or 'instagram' in contact.value %}
+                <i data-lucide="instagram" class="w-5 h-5 text-pink-400"></i>
+                {% elif contact.type == 'twitch' or 'twitch' in contact.value %}
+                <i data-lucide="twitch" class="w-5 h-5 text-purple-400"></i>
+                {% elif contact.type == 'discord' or 'discord' in contact.value %}
+                <i data-lucide="message-circle" class="w-5 h-5 text-indigo-400"></i>
+                {% else %}
+                <i data-lucide="link" class="w-5 h-5 text-zinc-400"></i>
                 {% endif %}
-            </span>
-            <div style="flex: 1; min-width: 0;">
-                <div style="font-weight: 600; word-break: break-all;">
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="font-medium text-zinc-200 truncate">
                     {% if contact.type in ['email', 'business_email'] %}
-                    <a href="mailto:{{ contact.value }}" style="color: #667eea;">{{ contact.value }}</a>
+                    <a href="mailto:{{ contact.value }}" class="text-indigo-400 hover:text-indigo-300 transition-colors">{{ contact.value }}</a>
                     {% elif contact.type == 'social_dm' or contact.value.startswith('http') %}
-                    <a href="{{ contact.value }}" target="_blank" style="color: #667eea;">{{ contact.value }}</a>
+                    <a href="{{ contact.value }}" target="_blank" class="text-indigo-400 hover:text-indigo-300 transition-colors">{{ contact.value }}</a>
                     {% else %}
                     {{ contact.value }}
                     {% endif %}
                 </div>
-                <div style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">
-                    {{ contact.notes or contact.type }}
+                <div class="text-xs text-zinc-500 mt-1 flex flex-wrap items-center gap-2">
+                    <span>{{ contact.notes or contact.type }}</span>
                     {% if contact.confidence %}
-                    | 可靠度: {{ "%.0f"|format(contact.confidence * 100) }}%
+                    <span class="text-zinc-600">|</span>
+                    <span>可靠度: {{ "%.0f"|format(contact.confidence * 100) }}%</span>
                     {% endif %}
                     {% if contact.validation %}
                         {% if contact.validation.valid %}
-                        <span style="color:#10b981; margin-left:0.5rem;">✓ 格式有效</span>
+                        <span class="inline-flex items-center gap-1 text-emerald-400">
+                            <i data-lucide="check" class="w-3 h-3"></i>
+                            格式有效
+                        </span>
                         {% endif %}
                         {% if contact.validation.mx_exists %}
-                        <span style="color:#10b981; margin-left:0.25rem;">✓ MX记录</span>
+                        <span class="inline-flex items-center gap-1 text-emerald-400">
+                            <i data-lucide="server" class="w-3 h-3"></i>
+                            MX记录
+                        </span>
                         {% endif %}
                         {% if contact.validation.disposable %}
-                        <span style="color:#ef4444; margin-left:0.25rem;">⚠ 一次性邮箱</span>
+                        <span class="inline-flex items-center gap-1 text-rose-400">
+                            <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                            一次性邮箱
+                        </span>
                         {% endif %}
                     {% endif %}
                 </div>
             </div>
             {% if contact == recommended_contact %}
-            <span class="badge badge-green" style="flex-shrink: 0;">推荐</span>
+            <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex-shrink-0">
+                推荐
+            </span>
             {% endif %}
         </div>
         {% endfor %}
@@ -334,16 +399,21 @@
 </div>
 {% endif %}
 
-<!-- 联系尝试记录 -->
-<div class="card">
-    <h3>📞 联系尝试记录</h3>
+<!-- Contact Attempts -->
+<div class="glass rounded-2xl p-6 border border-zinc-800 mb-8">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+            <i data-lucide="phone" class="w-5 h-5 text-indigo-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold">联系尝试记录</h3>
+    </div>
     
-    <!-- 新增记录表单 -->
-    <div style="margin-top:1rem; padding:1rem; background:#f0f9ff; border-radius:8px;">
-        <h4 style="font-size:0.9rem; margin-bottom:0.75rem; color:#0369a1;">记录新的联系尝试</h4>
+    <!-- New Record Form -->
+    <div class="mb-6 p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/20">
+        <h4 class="text-sm font-medium text-indigo-400 mb-3">记录新的联系尝试</h4>
         <form method="POST" action="/leads/{{ context.channel_url }}/record_attempt">
-            <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
-                <select name="channel" class="form-control" style="width:120px;" required>
+            <div class="flex flex-wrap gap-3">
+                <select name="channel" class="form-control-dark px-3 py-2 rounded-lg text-sm w-28" required>
                     <option value="">渠道</option>
                     <option value="email">邮件</option>
                     <option value="twitter">X/Twitter</option>
@@ -352,47 +422,67 @@
                     <option value="tiktok">TikTok</option>
                     <option value="other">其他</option>
                 </select>
-                <input type="text" name="to_value" placeholder="联系地址/账号" class="form-control" style="flex:1; min-width:200px;" required>
-                <input type="text" name="content_note" placeholder="备注（可选）" class="form-control" style="flex:1; min-width:150px;">
-                <button type="submit" class="btn btn-primary">+ 记录</button>
+                <input type="text" name="to_value" placeholder="联系地址/账号" class="form-control-dark px-3 py-2 rounded-lg text-sm flex-1 min-w-[200px]" required>
+                <input type="text" name="content_note" placeholder="备注（可选）" class="form-control-dark px-3 py-2 rounded-lg text-sm flex-1 min-w-[150px]">
+                <button type="submit" class="btn-primary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    记录
+                </button>
             </div>
         </form>
     </div>
     
-    <!-- 历史记录 -->
+    <!-- History -->
     {% if context.contact_attempts %}
-    <div style="margin-top:1rem;">
+    <div class="space-y-3">
         {% for attempt in context.contact_attempts | reverse %}
-        <div style="display:flex; align-items:center; gap:1rem; padding:0.75rem 1rem; background:#f9fafb; border-radius:8px; margin-bottom:0.5rem;">
-            <span style="font-size:1.2rem;">
-                {% if attempt.channel == 'email' %}📧
-                {% elif attempt.channel == 'twitter' %}🐦
-                {% elif attempt.channel == 'discord' %}💬
-                {% elif attempt.channel == 'instagram' %}📷
-                {% else %}📱{% endif %}
-            </span>
-            <div style="flex:1;">
-                <div style="font-weight:500;">{{ attempt.to }}</div>
-                <div style="font-size:0.8rem; color:#666;">
+        <div class="flex items-center gap-4 p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+            <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                {% if attempt.channel == 'email' %}
+                <i data-lucide="mail" class="w-5 h-5 text-emerald-400"></i>
+                {% elif attempt.channel == 'twitter' %}
+                <i data-lucide="twitter" class="w-5 h-5 text-sky-400"></i>
+                {% elif attempt.channel == 'discord' %}
+                <i data-lucide="message-circle" class="w-5 h-5 text-indigo-400"></i>
+                {% elif attempt.channel == 'instagram' %}
+                <i data-lucide="instagram" class="w-5 h-5 text-pink-400"></i>
+                {% else %}
+                <i data-lucide="smartphone" class="w-5 h-5 text-zinc-400"></i>
+                {% endif %}
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="font-medium text-zinc-200">{{ attempt.to }}</div>
+                <div class="text-xs text-zinc-500 mt-1">
                     {{ attempt.sent_at[:16] if attempt.sent_at else '' }}
-                    {% if attempt.content_note %} | {{ attempt.content_note }}{% endif %}
+                    {% if attempt.content_note %}<span class="text-zinc-600 mx-2">|</span>{{ attempt.content_note }}{% endif %}
                 </div>
             </div>
-            <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div class="flex items-center gap-2">
                 {% if attempt.status == 'replied' %}
-                <span style="padding:0.2rem 0.6rem; border-radius:12px; font-size:0.75rem; background:#d1fae5; color:#065f46;">✓ 已回复</span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <i data-lucide="check" class="w-3 h-3"></i>
+                    已回复
+                </span>
                 {% elif attempt.status == 'sent' %}
-                <span style="padding:0.2rem 0.6rem; border-radius:12px; font-size:0.75rem; background:#dbeafe; color:#1e40af;">已发送</span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                    已发送
+                </span>
                 {% elif attempt.status == 'opened' %}
-                <span style="padding:0.2rem 0.6rem; border-radius:12px; font-size:0.75rem; background:#fef3c7; color:#92400e;">已读</span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    已读
+                </span>
                 {% else %}
-                <span style="padding:0.2rem 0.6rem; border-radius:12px; font-size:0.75rem; background:#f3f4f6; color:#374151;">{{ attempt.status }}</span>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-zinc-800 text-zinc-400 border border-zinc-700">
+                    {{ attempt.status }}
+                </span>
                 {% endif %}
                 {% if attempt.status == 'sent' %}
-                <form method="POST" action="/leads/{{ context.channel_url }}/update_attempt_status" style="display:inline;">
+                <form method="POST" action="/leads/{{ context.channel_url }}/update_attempt_status" class="inline-flex">
                     <input type="hidden" name="attempt_id" value="{{ attempt.id }}">
                     <input type="hidden" name="status" value="replied">
-                    <button type="submit" class="btn btn-secondary" style="font-size:0.75rem; padding:0.2rem 0.5rem;">标记为已回复</button>
+                    <button type="submit" class="text-xs text-zinc-500 hover:text-emerald-400 transition-colors px-2 py-1 rounded hover:bg-zinc-800">
+                        标记已回复
+                    </button>
                 </form>
                 {% endif %}
             </div>
@@ -400,98 +490,132 @@
         {% endfor %}
     </div>
     {% else %}
-    <div style="text-align:center; color:#999; padding:1.5rem; margin-top:0.5rem;">暂无联系记录</div>
+    <div class="text-center py-8 text-zinc-500">
+        <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+        <p class="text-sm">暂无联系记录</p>
+    </div>
     {% endif %}
 </div>
 
-<!-- 邮件跟进序列 -->
-<div class="card">
-    <h3>📬 邮件跟进序列</h3>
+<!-- Email Sequence -->
+<div class="glass rounded-2xl p-6 border border-zinc-800 mb-8">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+            <i data-lucide="mail-plus" class="w-5 h-5 text-indigo-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold">邮件跟进序列</h3>
+    </div>
+    
     {% if context.email_sequence %}
     {% set seq = context.email_sequence %}
-    <div style="margin-top:1rem;">
+    <div>
         {% if seq.stopped_reason %}
-        <div style="padding:0.75rem 1rem; background:#fef3c7; border-radius:8px; border-left:3px solid #f59e0b; margin-bottom:1rem;">
-            <span style="font-size:0.85rem; color:#92400e;">序列已停止: {{ seq.stopped_reason }}</span>
+        <div class="mb-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+            <div class="flex items-center gap-2 text-amber-400 text-sm">
+                <i data-lucide="pause" class="w-4 h-4"></i>
+                序列已停止: {{ seq.stopped_reason }}
+            </div>
         </div>
         {% elif seq.completed %}
-        <div style="padding:0.75rem 1rem; background:#d1fae5; border-radius:8px; border-left:3px solid #10b981; margin-bottom:1rem;">
-            <span style="font-size:0.85rem; color:#065f46;">✓ 邮件序列全部发送完毕</span>
+        <div class="mb-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <div class="flex items-center gap-2 text-emerald-400 text-sm">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                邮件序列全部发送完毕
+            </div>
         </div>
         {% else %}
-        <div style="padding:0.75rem 1rem; background:#dbeafe; border-radius:8px; margin-bottom:1rem;">
-            <div style="font-size:0.85rem; color:#1e40af;">
-                <strong>游戏:</strong> {{ seq.game_name }} | 
-                <strong>预算:</strong> ${{ seq.anchor_price }} | 
-                <strong>当前步骤:</strong> {{ seq.current_step + 1 }}/4
+        <div class="mb-4 p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                <span class="text-zinc-300"><span class="text-zinc-500">游戏:</span> {{ seq.game_name }}</span>
+                <span class="text-zinc-300"><span class="text-zinc-500">预算:</span> ${{ seq.anchor_price }}</span>
+                <span class="text-zinc-300"><span class="text-zinc-500">当前:</span> {{ seq.current_step + 1 }}/4</span>
             </div>
             {% if seq.next_scheduled %}
-            <div style="font-size:0.8rem; color:#3b82f6; margin-top:0.25rem;">
-                下次发送时间: {{ seq.next_scheduled[:16] }}
+            <div class="text-xs text-indigo-400 mt-2">
+                下次发送: {{ seq.next_scheduled[:16] }}
             </div>
             {% endif %}
         </div>
         {% endif %}
         
-        <!-- 序列步骤进度 -->
-        <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+        <!-- Progress Steps -->
+        <div class="flex gap-2 mb-6">
             {% for step_name, step_label in [('initial','首次联系'), ('follow_up_1','3天跟进'), ('follow_up_2','7天跟进'), ('final','14天最终')] %}
             {% set step_idx = loop.index0 %}
             {% if step_idx < seq.current_step %}
-            <div style="flex:1; text-align:center; padding:0.5rem; border-radius:6px; background:#d1fae5; color:#065f46;">
-                <div style="font-size:0.7rem;">✓ {{ step_label }}</div>
+            <div class="flex-1 text-center py-2 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20">
+                <i data-lucide="check" class="w-3 h-3 inline mr-1"></i>
+                {{ step_label }}
             </div>
             {% elif step_idx == seq.current_step and not seq.completed and not seq.stopped_reason %}
-            <div style="flex:1; text-align:center; padding:0.5rem; border-radius:6px; background:#dbeafe; color:#1e40af; border:1px solid #93c5fd;">
-                <div style="font-size:0.7rem;">▶ {{ step_label }}</div>
+            <div class="flex-1 text-center py-2 rounded-lg bg-indigo-500/10 text-indigo-400 text-xs font-medium border border-indigo-500/50">
+                <i data-lucide="play" class="w-3 h-3 inline mr-1"></i>
+                {{ step_label }}
             </div>
             {% else %}
-            <div style="flex:1; text-align:center; padding:0.5rem; border-radius:6px; background:#f3f4f6; color:#9ca3af;">
-                <div style="font-size:0.7rem;">{{ step_label }}</div>
+            <div class="flex-1 text-center py-2 rounded-lg bg-zinc-800 text-zinc-600 text-xs font-medium border border-zinc-700">
+                {{ step_label }}
             </div>
             {% endif %}
             {% endfor %}
         </div>
         
         {% if not seq.completed and not seq.stopped_reason %}
-        <form method="POST" action="/leads/{{ context.channel_url }}/send_followup" style="margin-top:1rem;">
+        <form method="POST" action="/leads/{{ context.channel_url }}/send_followup">
             {% if not recommended_contact %}
-            <div style="margin-bottom:0.75rem; padding:0.75rem; background:#fef3c7; border-radius:6px; border:1px solid #f59e0b;">
-                <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color:#92400e;">⚠️ 未找到推荐联系方式，请手动输入邮箱：</p>
-                <input type="email" name="manual_email" placeholder="输入创作者邮箱" class="form-control" style="width:300px;" required>
+            <div class="mb-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                <p class="text-sm text-amber-400 mb-2 flex items-center gap-2">
+                    <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                    未找到推荐联系方式，请手动输入邮箱：
+                </p>
+                <input type="email" name="manual_email" placeholder="输入创作者邮箱" class="form-control-dark px-3 py-2 rounded-lg text-sm w-full max-w-xs" required>
             </div>
             {% endif %}
-            <button type="submit" class="btn btn-primary">📤 立即发送当前跟进</button>
+            <button type="submit" class="btn-primary inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                立即发送当前跟进
+            </button>
         </form>
         {% endif %}
     </div>
     {% else %}
-    <div style="margin-top:1rem;">
-        <p style="color:#666; font-size:0.9rem; margin-bottom:1rem;">启动自动跟进序列后，系统会在 3/7/14 天后自动提醒发送跟进邮件。</p>
-        <form method="POST" action="/leads/{{ context.channel_url }}/start_sequence" style="display:flex; gap:0.75rem; flex-wrap:wrap;">
-            <input type="text" name="game_name" placeholder="游戏名称" class="form-control" style="width:150px;" required>
-            <input type="number" name="anchor_price" placeholder="预算($)" class="form-control" style="width:120px;" value="1000">
-            <button type="submit" class="btn btn-primary">🚀 启动跟进序列</button>
+    <div>
+        <p class="text-sm text-zinc-500 mb-4">启动自动跟进序列后，系统会在 3/7/14 天后自动提醒发送跟进邮件。</p>
+        <form method="POST" action="/leads/{{ context.channel_url }}/start_sequence" class="flex flex-wrap gap-3">
+            <input type="text" name="game_name" placeholder="游戏名称" class="form-control-dark px-3 py-2 rounded-lg text-sm w-40" required>
+            <input type="number" name="anchor_price" placeholder="预算($)" class="form-control-dark px-3 py-2 rounded-lg text-sm w-32" value="1000">
+            <button type="submit" class="btn-primary inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium">
+                <i data-lucide="rocket" class="w-4 h-4"></i>
+                启动跟进序列
+            </button>
         </form>
     </div>
     {% endif %}
 </div>
 
-<!-- 邮件历史 -->
+<!-- Email History -->
 {% if email_history %}
-<div class="card">
-    <h3>📨 邮件历史</h3>
-    <div style="margin-top: 1rem;">
+<div class="glass rounded-2xl p-6 border border-zinc-800 mb-8">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+            <i data-lucide="mail-check" class="w-5 h-5 text-indigo-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold">邮件历史</h3>
+    </div>
+    
+    <div class="space-y-3">
         {% for email in email_history %}
-        <div style="padding: 1rem; background: #f9fafb; border-radius: 8px; margin-bottom: 0.75rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <div style="font-weight: 600;">{{ email.subject }}</div>
-                    <div style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">
-                        {{ email.sent_at }} | 发送至: {{ email.to_addr }}
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+            <div class="flex justify-between items-start gap-4">
+                <div class="flex-1 min-w-0">
+                    <div class="font-medium text-zinc-200 truncate">{{ email.subject }}</div>
+                    <div class="text-xs text-zinc-500 mt-1">
+                        {{ email.sent_at }} <span class="text-zinc-600 mx-2">|</span> 发送至: {{ email.to_addr }}
                     </div>
                 </div>
-                <span class="badge badge-green">已发送</span>
+                <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex-shrink-0">
+                    已发送
+                </span>
             </div>
         </div>
         {% endfor %}
@@ -499,21 +623,27 @@
 </div>
 {% endif %}
 
-<!-- 状态历史 -->
-<div class="card">
-    <h3>📋 状态历史</h3>
-    <div style="margin-top: 1rem;">
+<!-- Stage History -->
+<div class="glass rounded-2xl p-6 border border-zinc-800 mb-8">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+            <i data-lucide="history" class="w-5 h-5 text-indigo-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold">状态历史</h3>
+    </div>
+    
+    <div class="space-y-0">
         {% for history in stage_history %}
-        <div style="display: flex; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid #e5e7eb;">
-            <div style="color: #666; font-size: 0.8rem; min-width: 150px;">
+        <div class="flex gap-4 py-3 border-b border-zinc-800 last:border-0">
+            <div class="text-xs text-zinc-500 min-w-[140px] pt-0.5">
                 {{ history.timestamp[:19] if history.timestamp else 'N/A' }}
             </div>
-            <div>
-                <span style="color: #999;">{{ history.from }}</span>
-                <span style="margin: 0 0.5rem;">→</span>
-                <span style="font-weight: 600; color: #667eea;">{{ history.to }}</span>
+            <div class="flex-1">
+                <span class="text-zinc-500">{{ history.from }}</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 inline mx-2 text-zinc-600"></i>
+                <span class="font-medium text-indigo-400">{{ history.to }}</span>
                 {% if history.reason %}
-                <span style="color: #666; margin-left: 0.5rem;">({{ history.reason }})</span>
+                <span class="text-zinc-500 text-sm ml-2">({{ history.reason }})</span>
                 {% endif %}
             </div>
         </div>
@@ -521,7 +651,15 @@
     </div>
 </div>
 
-<div style="margin-top: 2rem;">
-    <a href="{{ url_for('leads') }}" class="btn btn-secondary">← 返回列表</a>
+<!-- Back Button -->
+<div class="flex items-center gap-4">
+    <a href="{{ url_for('leads') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors border border-zinc-700">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        返回列表
+    </a>
 </div>
+
+<script>
+    lucide.createIcons();
+</script>
 {% endblock %}

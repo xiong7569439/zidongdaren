@@ -1,313 +1,107 @@
 {% extends "base.html" %}
 
-{% block title %}邮件工具 - YouTube网红曝光合作系统{% endblock %}
+{% block title %}邮件工具 - KOL Nexus{% endblock %}
+{% block page_title %}邮件工具箱{% endblock %}
 
 {% block extra_css %}
 <style>
-    .email-template-section {
-        margin-bottom: 2rem;
-    }
-
     .template-card {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        border-left: 4px solid #667eea;
+        transition: all 0.2s ease;
     }
-
-    .template-card.follow-up {
-        border-left-color: #f59e0b;
+    
+    .template-card:hover {
+        border-color: rgba(99, 102, 241, 0.3);
     }
-
-    .template-card.negotiation {
-        border-left-color: #10b981;
-    }
-
-    .template-card.closure {
-        border-left-color: #ef4444;
-    }
-
-    .template-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-    .template-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #333;
-    }
-
-    .template-number {
-        background: #667eea;
-        color: white;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-
-    .template-card.follow-up .template-number {
-        background: #f59e0b;
-    }
-
-    .template-card.negotiation .template-number {
-        background: #10b981;
-    }
-
-    .template-card.closure .template-number {
-        background: #ef4444;
-    }
-
-    .template-meta {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .meta-tag {
-        background: #f3f4f6;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        color: #666;
-    }
-
+    
     .email-content {
-        background: #f9fafb;
-        border-radius: 8px;
-        padding: 1.25rem;
-        margin: 1rem 0;
-        font-family: "Courier New", monospace;
-        font-size: 0.9rem;
-        line-height: 1.8;
+        font-family: 'JetBrains Mono', 'Fira Code', monospace;
         white-space: pre-wrap;
         word-wrap: break-word;
-        color: #374151;
-        max-height: 400px;
-        overflow-y: auto;
     }
-
-    .subject-line {
-        background: #e0e7ff;
-        padding: 0.75rem 1rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-        font-weight: 500;
-        color: #4338ca;
-    }
-
-    .subject-label {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.25rem;
-        color: #6366f1;
-    }
-
-    .template-actions {
-        display: flex;
-        gap: 0.75rem;
-        margin-top: 1rem;
-    }
-
-    .btn-copy {
-        background: #667eea;
-        color: white;
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.85rem;
-        transition: all 0.2s;
-    }
-
-    .btn-copy:hover {
-        background: #5a67d8;
-    }
-
-    .btn-copy.copied {
-        background: #10b981;
-    }
-
-    .variable-list {
-        background: #fffbeb;
-        border: 1px solid #fcd34d;
-        border-radius: 8px;
-        padding: 1rem;
-        margin-top: 1rem;
-    }
-
-    .variable-list h4 {
-        font-size: 0.9rem;
-        color: #92400e;
-        margin-bottom: 0.5rem;
-    }
-
-    .variable-list ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .variable-list li {
-        font-size: 0.85rem;
-        color: #78350f;
-        padding: 0.25rem 0;
-        font-family: monospace;
-    }
-
-    .category-section {
-        margin-bottom: 2.5rem;
-    }
-
-    .category-title {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 2px solid #e5e7eb;
-    }
-
-    .quick-tools {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .tool-card {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        text-align: center;
-    }
-
-    .tool-icon {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .tool-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-
-    .tool-desc {
-        font-size: 0.9rem;
-        color: #666;
-        margin-bottom: 1rem;
-    }
-
-    .search-box {
-        margin-bottom: 2rem;
-    }
-
-    .search-input {
-        width: 100%;
-        padding: 1rem 1.5rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 12px;
-        font-size: 1rem;
-        transition: all 0.2s;
-    }
-
-    .search-input:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .filter-tabs {
-        display: flex;
-        gap: 0.5rem;
-        margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-    }
-
+    
     .filter-tab {
-        padding: 0.5rem 1rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 20px;
-        background: white;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-size: 0.9rem;
+        transition: all 0.2s ease;
     }
-
-    .filter-tab:hover,
+    
+    .filter-tab:hover {
+        background: rgba(99, 102, 241, 0.1);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+    
     .filter-tab.active {
-        background: #667eea;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
         color: white;
-        border-color: #667eea;
-    }
-
-    .hidden {
-        display: none;
+        border-color: transparent;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="card">
-    <h2>📧 邮件工具箱</h2>
-    <p>快速访问所有邮件话术模板，支持一键复制。发件邮箱默认：<strong>cooperate@topuplive.com</strong></p>
-</div>
-
-<!-- 快速工具 -->
-<div class="quick-tools">
-    <div class="tool-card">
-        <div class="tool-icon">🎯</div>
-        <div class="tool-title">首封触达</div>
-        <div class="tool-desc">首次联系创作者的标准话术模板</div>
-        <a href="#outreach" class="btn btn-primary">查看模板</a>
-    </div>
-    <div class="tool-card">
-        <div class="tool-icon">🔄</div>
-        <div class="tool-title">跟进邮件</div>
-        <div class="tool-desc">48小时未回复后的跟进话术</div>
-        <a href="#followup" class="btn btn-primary">查看模板</a>
-    </div>
-    <div class="tool-card">
-        <div class="tool-icon">💬</div>
-        <div class="tool-title">谈判回复</div>
-        <div class="tool-desc">处理各种回复场景的应对话术</div>
-        <a href="#negotiation" class="btn btn-primary">查看模板</a>
-    </div>
-    <div class="tool-card">
-        <div class="tool-icon">📋</div>
-        <div class="tool-title">Brief/排期</div>
-        <div class="tool-desc">发送素材包和确认排期的话术</div>
-        <a href="#brief" class="btn btn-primary">查看模板</a>
+<!-- Header -->
+<div class="glass rounded-2xl p-6 border border-zinc-800 mb-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-semibold mb-2">邮件话术模板库</h2>
+            <p class="text-sm text-zinc-500">快速访问所有邮件话术模板，支持一键复制</p>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-zinc-400">
+            <i data-lucide="mail" class="w-4 h-4"></i>
+            发件邮箱: cooperate@topuplive.com
+        </div>
     </div>
 </div>
 
-<!-- 搜索和筛选 -->
-<div class="search-box">
-    <input type="text" class="search-input" id="templateSearch" placeholder="🔍 搜索邮件模板（如：首封、跟进、压价、Brief...）">
+<!-- Quick Tools -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <a href="#outreach" class="glass rounded-xl p-5 border border-zinc-800 hover:border-indigo-500/30 transition-all group">
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-3 group-hover:bg-indigo-500/20 transition-colors">
+            <i data-lucide="send" class="w-5 h-5 text-indigo-400"></i>
+        </div>
+        <div class="font-medium text-zinc-200 mb-1">首封触达</div>
+        <div class="text-xs text-zinc-500">首次联系创作者的标准话术</div>
+    </a>
+    <a href="#followup" class="glass rounded-xl p-5 border border-zinc-800 hover:border-amber-500/30 transition-all group">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center mb-3 group-hover:bg-amber-500/20 transition-colors">
+            <i data-lucide="refresh-cw" class="w-5 h-5 text-amber-400"></i>
+        </div>
+        <div class="font-medium text-zinc-200 mb-1">跟进邮件</div>
+        <div class="text-xs text-zinc-500">48小时未回复后的跟进话术</div>
+    </a>
+    <a href="#negotiation" class="glass rounded-xl p-5 border border-zinc-800 hover:border-emerald-500/30 transition-all group">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-3 group-hover:bg-emerald-500/20 transition-colors">
+            <i data-lucide="message-square" class="w-5 h-5 text-emerald-400"></i>
+        </div>
+        <div class="font-medium text-zinc-200 mb-1">谈判回复</div>
+        <div class="text-xs text-zinc-500">处理各种回复场景的应对话术</div>
+    </a>
+    <a href="#brief" class="glass rounded-xl p-5 border border-zinc-800 hover:border-rose-500/30 transition-all group">
+        <div class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center mb-3 group-hover:bg-rose-500/20 transition-colors">
+            <i data-lucide="file-text" class="w-5 h-5 text-rose-400"></i>
+        </div>
+        <div class="font-medium text-zinc-200 mb-1">Brief/排期</div>
+        <div class="text-xs text-zinc-500">发送素材包和确认排期的话术</div>
+    </a>
 </div>
 
-<div class="filter-tabs">
-    <div class="filter-tab active" data-filter="all">全部</div>
-    <div class="filter-tab" data-filter="outreach">首封触达</div>
-    <div class="filter-tab" data-filter="followup">跟进</div>
-    <div class="filter-tab" data-filter="negotiation">谈判</div>
-    <div class="filter-tab" data-filter="brief">Brief/排期</div>
-    <div class="filter-tab" data-filter="closure">结束</div>
+<!-- Search -->
+<div class="mb-6">
+    <div class="relative max-w-xl">
+        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500"></i>
+        <input type="text" 
+               id="templateSearch" 
+               class="form-control-dark w-full pl-12 pr-4 py-3 rounded-xl" 
+               placeholder="搜索邮件模板（如：首封、跟进、压价、Brief...）">
+    </div>
+</div>
+
+<!-- Filter Tabs -->
+<div class="flex flex-wrap gap-2 mb-8">
+    <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-zinc-700 bg-zinc-800/50 text-zinc-300 active" data-filter="all">全部</button>
+    <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-zinc-700 bg-zinc-800/50 text-zinc-300" data-filter="outreach">首封触达</button>
+    <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-zinc-700 bg-zinc-800/50 text-zinc-300" data-filter="followup">跟进</button>
+    <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-zinc-700 bg-zinc-800/50 text-zinc-300" data-filter="negotiation">谈判</button>
+    <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-zinc-700 bg-zinc-800/50 text-zinc-300" data-filter="brief">Brief/排期</button>
+    <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-zinc-700 bg-zinc-800/50 text-zinc-300" data-filter="closure">结束</button>
 </div>
 
 <!-- 首封触达 -->

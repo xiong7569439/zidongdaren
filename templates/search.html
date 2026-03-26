@@ -1,182 +1,87 @@
 {% extends "base.html" %}
 
-{% block title %}搜索创作者 - YouTube网红曝光合作系统{% endblock %}
+{% block title %}搜索创作者 - KOL Nexus{% endblock %}
+{% block page_title %}搜索创作者{% endblock %}
 
 {% block extra_css %}
 <style>
-    .creator-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-    
     .creator-card {
-        background: white;
-        border: 2px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 1rem;
-        transition: all 0.2s;
+        transition: all 0.2s ease;
         cursor: pointer;
     }
     
     .creator-card:hover {
-        border-color: #667eea;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        border-color: rgba(99, 102, 241, 0.5);
+        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
     }
     
     .creator-card.selected {
         border-color: #10b981;
-        background: #f0fdf4;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+        background: rgba(16, 185, 129, 0.05);
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
     }
     
     .creator-card.selected .select-indicator {
         background: #10b981;
+        border-color: #10b981;
         color: white;
     }
     
     .select-indicator {
         width: 24px;
         height: 24px;
-        border: 2px solid #d1d5db;
+        border: 2px solid #3f3f46;
         border-radius: 6px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 0.9rem;
         transition: all 0.2s;
-    }
-    
-    .creator-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 0.75rem;
-    }
-    
-    .creator-avatar {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-    
-    .creator-info {
-        flex: 1;
-        min-width: 0;
-    }
-    
-    .creator-name {
-        font-weight: 600;
-        color: #111;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    
-    .creator-link {
-        font-size: 0.8rem;
-        color: #667eea;
-    }
-    
-    .creator-stats {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
-        margin-bottom: 0.75rem;
-        padding: 0.5rem;
-        background: #f9fafb;
-        border-radius: 8px;
-    }
-    
-    .creator-stat {
-        text-align: center;
-    }
-    
-    .creator-stat-value {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #667eea;
-    }
-    
-    .creator-stat-label {
-        font-size: 0.7rem;
-        color: #666;
-    }
-    
-    .creator-video {
-        font-size: 0.8rem;
-        color: #666;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin-bottom: 0.75rem;
+        color: transparent;
     }
     
     .batch-actions {
         position: sticky;
         bottom: 20px;
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 1rem 1.5rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        z-index: 100;
-    }
-    
-    .result-count {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.4rem 0.8rem;
-        background: #f3f4f6;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        color: #374151;
+        z-index: 50;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-    <h2>🔍 YouTube创作者搜索</h2>
-</div>
-
-<div class="card" style="max-width: 800px;">
+<!-- Search Form -->
+<div class="glass rounded-2xl p-6 border border-zinc-800 mb-8 max-w-4xl">
     <form method="POST" action="{{ url_for('search_creators') }}" id="searchForm">
-        <div class="form-group">
-            <label for="query">搜索关键词</label>
-            <input type="text" 
-                   id="query" 
-                   name="query" 
-                   class="form-control" 
-                   placeholder="例如: genshin impact gameplay, minecraft tutorial"
-                   value="{{ query }}"
-                   required>
-            <small style="color: #666; margin-top: 0.5rem; display: block;">
-                输入游戏名称、品类或相关内容关键词
-            </small>
+        <div class="mb-6">
+            <label for="query" class="block text-sm font-medium text-zinc-400 mb-2">搜索关键词</label>
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500"></i>
+                <input type="text" 
+                       id="query" 
+                       name="query" 
+                       class="form-control-dark w-full pl-12 pr-4 py-3 rounded-xl text-base" 
+                       placeholder="例如: genshin impact gameplay, minecraft tutorial"
+                       value="{{ query }}"
+                       required>
+            </div>
+            <p class="text-xs text-zinc-500 mt-2">输入游戏名称、品类或相关内容关键词</p>
         </div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div class="form-group">
-                <label for="min_subscribers">最小订阅数（可选）</label>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label for="min_subscribers" class="block text-sm font-medium text-zinc-400 mb-2">最小订阅数（可选）</label>
                 <input type="number" 
                        id="min_subscribers" 
                        name="min_subscribers" 
-                       class="form-control" 
+                       class="form-control-dark w-full px-4 py-3 rounded-xl" 
                        placeholder="例如: 10000"
                        min="0"
                        value="{{ min_subscribers or '' }}">
             </div>
             
-            <div class="form-group">
-                <label for="max_results">结果数量</label>
-                <select id="max_results" name="max_results" class="form-control">
+            <div>
+                <label for="max_results" class="block text-sm font-medium text-zinc-400 mb-2">结果数量</label>
+                <select id="max_results" name="max_results" class="form-control-dark w-full px-4 py-3 rounded-xl">
                     <option value="20" {% if max_results == 20 %}selected{% endif %}>20 个</option>
                     <option value="30" {% if max_results == 30 %}selected{% endif %}>30 个</option>
                     <option value="40" {% if max_results == 40 %}selected{% endif %}>40 个</option>
@@ -185,15 +90,16 @@
             </div>
         </div>
         
-        <!-- 高级筛选 -->
-        <div style="margin-top: 1rem; padding: 1rem; background: #f9fafb; border-radius: 8px;">
-            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.75rem; font-weight: 600;">
-                🔍 高级筛选（可选）
+        <!-- Advanced Filters -->
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800 mb-6">
+            <div class="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-4">
+                <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+                高级筛选（可选）
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label for="country" style="font-size: 0.85rem;">国家/地区</label>
-                    <select id="country" name="country" class="form-control" style="font-size: 0.9rem;">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="country" class="block text-xs text-zinc-500 mb-2">国家/地区</label>
+                    <select id="country" name="country" class="form-control-dark w-full px-3 py-2.5 rounded-lg text-sm">
                         <option value="">全部国家</option>
                         <option value="US" {% if country == 'US' %}selected{% endif %}>🇺🇸 美国</option>
                         <option value="GB" {% if country == 'GB' %}selected{% endif %}>🇬🇧 英国</option>
@@ -218,9 +124,9 @@
                     </select>
                 </div>
                 
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label for="language" style="font-size: 0.85rem;">语言</label>
-                    <select id="language" name="language" class="form-control" style="font-size: 0.9rem;">
+                <div>
+                    <label for="language" class="block text-xs text-zinc-500 mb-2">语言</label>
+                    <select id="language" name="language" class="form-control-dark w-full px-3 py-2.5 rounded-lg text-sm">
                         <option value="">全部语言</option>
                         <option value="en" {% if language == 'en' %}selected{% endif %}>🇺🇸 英语</option>
                         <option value="zh" {% if language == 'zh' %}selected{% endif %}>🇨🇳 中文</option>
@@ -239,82 +145,87 @@
             </div>
         </div>
         
-        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">🔍 搜索</button>
+        <button type="submit" class="btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium">
+            <i data-lucide="search" class="w-5 h-5"></i>
+            搜索创作者
+        </button>
     </form>
 </div>
 
 {% if results %}
-<div class="card" style="margin-top: 1.5rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h3 style="margin: 0;">搜索结果</h3>
-        <span class="result-count">
-            <span>📊</span>
-            <span>找到 {{ results|length }} 个创作者（按粉丝量排序）</span>
+<div class="glass rounded-2xl p-6 border border-zinc-800">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h3 class="text-lg font-semibold">搜索结果</h3>
+        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm bg-zinc-800 text-zinc-400 border border-zinc-700">
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+            找到 {{ results|length }} 个创作者（按粉丝量排序）
         </span>
     </div>
     
     <form method="POST" action="{{ url_for('batch_add_from_search') }}" id="batchForm">
-        <div class="creator-grid">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {% for creator in results %}
-            <div class="creator-card" data-creator-id="{{ creator.channel_id }}" onclick="toggleSelect(this, '{{ creator.channel_id }}')">
-                <div class="creator-header">
-                    <div class="select-indicator">✓</div>
+            <div class="creator-card glass rounded-xl p-4 border border-zinc-700" data-creator-id="{{ creator.channel_id }}" onclick="toggleSelect(this, '{{ creator.channel_id }}')">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="select-indicator flex-shrink-0">✓</div>
                     {% if creator.thumbnail %}
-                    <img src="{{ creator.thumbnail }}" alt="{{ creator.channel_title }}" class="creator-avatar">
+                    <img src="{{ creator.thumbnail }}" alt="{{ creator.channel_title }}" class="w-12 h-12 rounded-xl object-cover">
                     {% else %}
-                    <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                    <div class="w-12 h-12 rounded-xl gradient-indigo flex items-center justify-center text-white font-semibold">
                         {{ creator.channel_title[0] }}
                     </div>
                     {% endif %}
-                    <div class="creator-info">
-                        <div class="creator-name">{{ creator.channel_title }}</div>
-                        <a href="{{ creator.channel_url }}" target="_blank" class="creator-link" onclick="event.stopPropagation();">
+                    <div class="flex-1 min-w-0">
+                        <div class="font-medium text-zinc-200 truncate">{{ creator.channel_title }}</div>
+                        <a href="{{ creator.channel_url }}" target="_blank" class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors" onclick="event.stopPropagation();">
                             查看频道 →
                         </a>
                     </div>
                 </div>
                 
-                <div class="creator-stats">
-                    <div class="creator-stat">
-                        <div class="creator-stat-value">{{ creator.subscriber_display or "{:,}".format(creator.subscriber_count) }}</div>
-                        <div class="creator-stat-label">订阅者</div>
+                <div class="grid grid-cols-3 gap-2 mb-3 p-2 rounded-lg bg-zinc-900/50">
+                    <div class="text-center">
+                        <div class="text-sm font-bold text-indigo-400">{{ creator.subscriber_display or "{:,}".format(creator.subscriber_count) }}</div>
+                        <div class="text-xs text-zinc-500">订阅</div>
                     </div>
-                    <div class="creator-stat">
-                        <div class="creator-stat-value">{{ "{:,}".format(creator.video_count) }}</div>
-                        <div class="creator-stat-label">视频</div>
+                    <div class="text-center">
+                        <div class="text-sm font-bold text-indigo-400">{{ "{:,}".format(creator.video_count) }}</div>
+                        <div class="text-xs text-zinc-500">视频</div>
                     </div>
-                    <div class="creator-stat">
-                        <div class="creator-stat-value">{{ creator.country or 'N/A' }}</div>
-                        <div class="creator-stat-label">地区</div>
+                    <div class="text-center">
+                        <div class="text-sm font-bold text-indigo-400">{{ creator.country or 'N/A' }}</div>
+                        <div class="text-xs text-zinc-500">地区</div>
                     </div>
                 </div>
                 
                 {% if creator.sample_video_title %}
-                <div class="creator-video" title="{{ creator.sample_video_title }}">
-                    🎬 {{ creator.sample_video_title }}
+                <div class="text-xs text-zinc-500 truncate" title="{{ creator.sample_video_title }}">
+                    <i data-lucide="play-circle" class="w-3.5 h-3.5 inline mr-1"></i>
+                    {{ creator.sample_video_title }}
                 </div>
                 {% endif %}
                 
-                <!-- 隐藏字段 -->
-                <input type="checkbox" name="selected_creators" value="{{ creator.channel_id }}" id="checkbox_{{ creator.channel_id }}" style="display: none;">
+                <!-- Hidden Fields -->
+                <input type="checkbox" name="selected_creators" value="{{ creator.channel_id }}" id="checkbox_{{ creator.channel_id }}" class="hidden">
                 <input type="hidden" name="creator_data_{{ creator.channel_id }}_url" value="{{ creator.channel_url }}">
                 <input type="hidden" name="creator_data_{{ creator.channel_id }}_title" value="{{ creator.channel_title }}">
             </div>
             {% endfor %}
         </div>
         
-        <!-- 批量操作栏 -->
-        <div class="batch-actions" id="batchActions" style="display: none; margin-top: 1.5rem;">
-            <div>
-                <span style="font-weight: 600;">已选择 <span id="selectedCount">0</span> 个创作者</span>
-            </div>
-            <div style="display: flex; gap: 0.75rem;">
-                <button type="button" class="btn btn-secondary" onclick="clearSelection()">
-                    清空选择
-                </button>
-                <button type="submit" class="btn btn-success">
-                    ➕ 批量添加为线索
-                </button>
+        <!-- Batch Actions -->
+        <div class="batch-actions glass rounded-xl p-4 border border-zinc-700 mt-6 hidden" id="batchActions">
+            <div class="flex items-center justify-between">
+                <span class="font-medium text-zinc-200">已选择 <span id="selectedCount" class="text-indigo-400">0</span> 个创作者</span>
+                <div class="flex gap-3">
+                    <button type="button" onclick="clearSelection()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors border border-zinc-700">
+                        清空选择
+                    </button>
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500 text-white hover:bg-emerald-600 transition-colors">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        批量添加为线索
+                    </button>
+                </div>
             </div>
         </div>
     </form>
@@ -346,9 +257,9 @@
         selectedCount.textContent = selectedCreators.size;
         
         if (selectedCreators.size > 0) {
-            batchActions.style.display = 'flex';
+            batchActions.classList.remove('hidden');
         } else {
-            batchActions.style.display = 'none';
+            batchActions.classList.add('hidden');
         }
     }
     
@@ -363,7 +274,6 @@
         updateBatchActions();
     }
     
-    // 全选功能
     function selectAll() {
         document.querySelectorAll('.creator-card').forEach(card => {
             const creatorId = card.dataset.creatorId;
@@ -374,22 +284,45 @@
     }
 </script>
 {% elif query %}
-<div class="card" style="margin-top: 1.5rem; text-align: center; padding: 3rem;">
-    <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
-    <p>未找到匹配的创作者</p>
-    <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
-        尝试使用不同的关键词或减少筛选条件
-    </p>
+<div class="glass rounded-2xl p-12 text-center border border-zinc-800">
+    <div class="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="search-x" class="w-8 h-8 text-zinc-600"></i>
+    </div>
+    <h3 class="text-lg font-medium text-zinc-300 mb-2">未找到匹配的创作者</h3>
+    <p class="text-sm text-zinc-500">尝试使用不同的关键词或减少筛选条件</p>
 </div>
 {% endif %}
 
-<div class="card" style="margin-top: 1.5rem;">
-    <h3>💡 搜索建议</h3>
-    <ul style="margin-top: 1rem; padding-left: 1.5rem; color: #666;">
-        <li><strong>游戏名称:</strong> "genshin impact", "honkai star rail", "mobile legends"</li>
-        <li><strong>游戏类型:</strong> "rpg gameplay", "fps mobile", "strategy game"</li>
-        <li><strong>内容类型:</strong> "gameplay walkthrough", "character guide", "pvp ranking"</li>
-        <li><strong>语言筛选:</strong> 可以加上语言如 "genshin impact español"</li>
-    </ul>
+<!-- Search Tips -->
+<div class="glass rounded-2xl p-6 border border-zinc-800 mt-8">
+    <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+            <i data-lucide="lightbulb" class="w-5 h-5 text-amber-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold">搜索建议</h3>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+            <div class="text-sm font-medium text-zinc-300 mb-2">游戏名称</div>
+            <p class="text-xs text-zinc-500">"genshin impact", "honkai star rail", "mobile legends"</p>
+        </div>
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+            <div class="text-sm font-medium text-zinc-300 mb-2">游戏类型</div>
+            <p class="text-xs text-zinc-500">"rpg gameplay", "fps mobile", "strategy game"</p>
+        </div>
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+            <div class="text-sm font-medium text-zinc-300 mb-2">内容类型</div>
+            <p class="text-xs text-zinc-500">"gameplay walkthrough", "character guide", "pvp ranking"</p>
+        </div>
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+            <div class="text-sm font-medium text-zinc-300 mb-2">语言筛选</div>
+            <p class="text-xs text-zinc-500">可以加上语言如 "genshin impact español"</p>
+        </div>
+    </div>
 </div>
+
+<script>
+    lucide.createIcons();
+</script>
 {% endblock %}

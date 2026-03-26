@@ -1,9 +1,67 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}YouTube网红曝光合作系统{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        zinc: {
+                            950: '#09090b',
+                            900: '#18181b',
+                            850: '#1f1f23',
+                            800: '#27272a',
+                            750: '#2e2e33',
+                            700: '#3f3f46',
+                            600: '#52525b',
+                            500: '#71717a',
+                            400: '#a1a1aa',
+                            300: '#d4d4d8',
+                            200: '#e4e4e7',
+                            100: '#f4f4f5',
+                            50: '#fafafa',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
         * {
             margin: 0;
@@ -12,275 +70,425 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: #f5f7fa;
-            color: #333;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #09090b;
+            color: #fafafa;
             line-height: 1.6;
+            min-height: 100vh;
         }
         
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
         
-        .navbar h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
+        ::-webkit-scrollbar-track {
+            background: #18181b;
         }
         
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            margin-top: 0.5rem;
+        ::-webkit-scrollbar-thumb {
+            background: #3f3f46;
+            border-radius: 4px;
         }
         
-        .nav-links a {
-            color: rgba(255,255,255,0.9);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #52525b;
         }
         
-        .nav-links a:hover {
-            color: white;
+        /* Glass Effect */
+        .glass {
+            background: rgba(39, 39, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(63, 63, 70, 0.5);
         }
         
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+        .glass-strong {
+            background: rgba(24, 24, 27, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(63, 63, 70, 0.6);
         }
         
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
-        .card h2 {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            color: #444;
+        /* Gradient Backgrounds */
+        .gradient-indigo {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
         }
         
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
+        .gradient-emerald {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         }
         
+        .gradient-amber {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .gradient-rose {
+            background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+        }
+        
+        /* Card Hover Effect */
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        
+        /* Button Styles */
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
+            border: none;
+            transition: all 0.2s ease;
         }
         
         .btn-primary:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
         }
         
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #555;
+        .btn-primary:active {
+            transform: scale(0.98);
         }
         
-        .btn-secondary:hover {
-            background: #e0e0e0;
+        /* Nav Item Active State */
+        .nav-item {
+            position: relative;
+            transition: all 0.2s ease;
         }
         
-        .btn-success {
-            background: #10b981;
-            color: white;
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 0;
+            background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 0 3px 3px 0;
+            transition: height 0.2s ease;
         }
         
-        .btn-success:hover {
-            background: #059669;
+        .nav-item:hover::before,
+        .nav-item.active::before {
+            height: 60%;
         }
         
-        .alert {
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
+        /* Form Controls */
+        .form-control-dark {
+            background: #18181b;
+            border: 1px solid #3f3f46;
+            color: #fafafa;
+            transition: all 0.2s ease;
         }
         
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-        }
-        
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #667eea;
-        }
-        
-        .stat-label {
-            color: #666;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        th, td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        th {
-            font-weight: 600;
-            color: #555;
-            background: #f9fafb;
-        }
-        
-        tr:hover {
-            background: #f9fafb;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        
-        .badge-blue {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-        
-        .badge-green {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .badge-yellow {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        
-        .badge-red {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #444;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.2s;
-        }
-        
-        .form-control:focus {
+        .form-control-dark:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
         }
         
-        textarea.form-control {
-            min-height: 120px;
-            resize: vertical;
-        }
-        
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
+        /* Status Indicators */
         .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
+            position: relative;
+        }
+        
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
         
         .status-dot.online {
             background: #10b981;
         }
         
+        .status-dot.online::after {
+            border: 2px solid #10b981;
+        }
+        
         .status-dot.offline {
             background: #ef4444;
         }
         
-        {% block extra_css %}{% endblock %}
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <h1>🎬 YouTube网红曝光合作系统</h1>
-        <div class="nav-links">
-            <a href="{{ url_for('index') }}">📊 Dashboard</a>
-            <a href="{{ url_for('leads') }}">📋 线索管理</a>
-            <a href="{{ url_for('search_creators') }}">🔍 搜索创作者</a>
-            <a href="{{ url_for('email_tools') }}">📧 邮件工具</a>
-            <a href="{{ url_for('new_lead') }}">➕ 新建线索</a>
-            <a href="{{ url_for('settings') }}">⚙️ 设置</a>
-        </div>
-    </nav>
-    
-    <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+        .status-dot.warning {
+            background: #f59e0b;
+        }
         
-        {% block content %}{% endblock %}
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+        
+        /* Toast Animation */
+        .toast-enter {
+            animation: toastSlide 0.4s ease-out forwards;
+        }
+        
+        @keyframes toastSlide {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Page Transition */
+        .page-content {
+            animation: slideUp 0.4s ease-out;
+        }
+        
+        /* Badge Styles */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        /* Table Styles */
+        .table-dark {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .table-dark th {
+            background: #18181b;
+            color: #a1a1aa;
+            font-weight: 500;
+            text-align: left;
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid #27272a;
+        }
+        
+        .table-dark td {
+            padding: 1rem;
+            border-bottom: 1px solid #27272a;
+            transition: background 0.15s ease;
+        }
+        
+        .table-dark tr:hover td {
+            background: rgba(39, 39, 42, 0.5);
+        }
+        
+        /* Sidebar Collapse for Mobile */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+            }
+        }
+        
+        /* Extra CSS Block */
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-zinc-950 text-zinc-50 antialiased">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="sidebar fixed left-0 top-0 h-full w-64 glass-strong z-40 flex flex-col">
+            <!-- Logo -->
+            <div class="p-6 border-b border-zinc-800">
+                <a href="{{ url_for('index') }}" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl gradient-indigo flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-shadow">
+                        <i data-lucide="youtube" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight">KOL Nexus</h1>
+                        <p class="text-xs text-zinc-500">网红合作平台</p>
+                    </div>
+                </a>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+                <a href="{{ url_for('index') }}" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/50 transition-all {{ 'active bg-zinc-800/50 text-zinc-50' if request.endpoint == 'index' else '' }}">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span class="font-medium">仪表盘</span>
+                </a>
+                
+                <a href="{{ url_for('leads') }}" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/50 transition-all {{ 'active bg-zinc-800/50 text-zinc-50' if request.endpoint == 'leads' else '' }}">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span class="font-medium">线索管理</span>
+                    {% if stats and stats.total_leads %}
+                    <span class="ml-auto bg-indigo-500/20 text-indigo-400 text-xs px-2 py-0.5 rounded-full">{{ stats.total_leads }}</span>
+                    {% endif %}
+                </a>
+                
+                <a href="{{ url_for('search_creators') }}" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/50 transition-all {{ 'active bg-zinc-800/50 text-zinc-50' if request.endpoint == 'search_creators' else '' }}">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                    <span class="font-medium">搜索创作者</span>
+                </a>
+                
+                <a href="{{ url_for('new_lead') }}" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/50 transition-all {{ 'active bg-zinc-800/50 text-zinc-50' if request.endpoint == 'new_lead' else '' }}">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                    <span class="font-medium">新建线索</span>
+                </a>
+                
+                <a href="{{ url_for('email_tools') }}" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/50 transition-all {{ 'active bg-zinc-800/50 text-zinc-50' if request.endpoint == 'email_tools' else '' }}">
+                    <i data-lucide="mail" class="w-5 h-5"></i>
+                    <span class="font-medium">邮件工具</span>
+                </a>
+                
+                <div class="pt-4 mt-4 border-t border-zinc-800">
+                    <a href="{{ url_for('settings') }}" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/50 transition-all {{ 'active bg-zinc-800/50 text-zinc-50' if request.endpoint == 'settings' else '' }}">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                        <span class="font-medium">设置</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <!-- User Profile -->
+            <div class="p-4 border-t border-zinc-800">
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/30 border border-zinc-700/50">
+                    <div class="w-9 h-9 rounded-full gradient-indigo flex items-center justify-center text-sm font-semibold">
+                        U
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium truncate">运营团队</p>
+                        <p class="text-xs text-zinc-500">管理员</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content flex-1 ml-64 min-h-screen">
+            <!-- Header -->
+            <header class="sticky top-0 z-30 glass-strong border-b border-zinc-800">
+                <div class="flex items-center justify-between px-8 py-4">
+                    <!-- Mobile Menu Button -->
+                    <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg hover:bg-zinc-800 transition-colors">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    
+                    <!-- Page Title -->
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-xl font-semibold">{% block page_title %}{% endblock %}</h2>
+                    </div>
+                    
+                    <!-- Right Actions -->
+                    <div class="flex items-center gap-4">
+                        <!-- Search -->
+                        <div class="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/10 transition-all">
+                            <i data-lucide="search" class="w-4 h-4 text-zinc-500"></i>
+                            <input type="text" placeholder="搜索..." class="bg-transparent border-none outline-none text-sm w-48 placeholder-zinc-600">
+                        </div>
+                        
+                        <!-- Notifications -->
+                        <button class="relative p-2 rounded-xl hover:bg-zinc-800 transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5 text-zinc-400"></i>
+                            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content Area -->
+            <div class="p-8 page-content">
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="space-y-3 mb-6">
+                            {% for category, message in messages %}
+                                <div class="toast-enter flex items-center gap-3 px-4 py-3 rounded-xl border {{ 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' if category == 'success' else 'bg-rose-500/10 border-rose-500/20 text-rose-400' if category == 'error' else 'bg-amber-500/10 border-amber-500/20 text-amber-400' }} backdrop-blur-sm">
+                                    {% if category == 'success' %}
+                                        <i data-lucide="check-circle" class="w-5 h-5 flex-shrink-0"></i>
+                                    {% elif category == 'error' %}
+                                        <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0"></i>
+                                    {% else %}
+                                        <i data-lucide="info" class="w-5 h-5 flex-shrink-0"></i>
+                                    {% endif %}
+                                    <span class="text-sm">{{ message }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </main>
     </div>
+    
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 hidden lg:hidden" onclick="closeSidebar()"></div>
+    
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+        
+        // Mobile Sidebar Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.querySelector('.sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+                sidebarOverlay.classList.toggle('hidden');
+            });
+        }
+        
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.add('hidden');
+        }
+        
+        // Auto-hide flash messages after 5 seconds
+        setTimeout(() => {
+            document.querySelectorAll('.toast-enter').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(100%)';
+                el.style.transition = 'all 0.3s ease';
+                setTimeout(() => el.remove(), 300);
+            });
+        }, 5000);
+    </script>
     
     {% block extra_js %}{% endblock %}
 </body>

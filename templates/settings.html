@@ -1,135 +1,238 @@
 {% extends "base.html" %}
 
-{% block title %}设置 - YouTube网红曝光合作系统{% endblock %}
+{% block title %}设置 - KOL Nexus{% endblock %}
+{% block page_title %}系统设置{% endblock %}
 
 {% block content %}
-<h2>⚙️ 系统设置</h2>
-
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+<!-- Config Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
     <!-- YouTube API -->
-    <div class="card">
-        <h3>📺 YouTube API</h3>
-        <div style="margin-top: 1rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-                <span class="status-dot {{ 'online' if config.youtube_api.api_key else 'offline' }}"></span>
-                <span>{{ '已配置' if config.youtube_api.api_key else '未配置' }}</span>
+    <div class="glass rounded-2xl p-6 border border-zinc-800">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center">
+                <i data-lucide="youtube" class="w-5 h-5 text-rose-400"></i>
             </div>
-            {% if config.youtube_api.api_key %}
-            <div style="font-size: 0.9rem; color: #666;">
-                <div>API Key: {{ config.youtube_api.api_key[:15] }}...</div>
-                <div style="margin-top: 0.5rem;">状态: {{ '启用' if config.youtube_api.enabled else '禁用' }}</div>
-            </div>
-            {% else %}
-            <div style="font-size: 0.9rem; color: #666;">
-                <p>请在 config.yaml 中配置 YouTube API Key</p>
-                <p style="margin-top: 0.5rem;">
-                    <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: #667eea;">
-                        获取 API Key →
-                    </a>
-                </p>
-            </div>
-            {% endif %}
+            <h3 class="font-semibold">YouTube API</h3>
         </div>
+        
+        <div class="flex items-center gap-2 mb-4">
+            <span class="w-2 h-2 rounded-full {{ 'bg-emerald-500 shadow-lg shadow-emerald-500/50' if config.youtube_api.api_key else 'bg-rose-500' }}"></span>
+            <span class="text-sm {{ 'text-emerald-400' if config.youtube_api.api_key else 'text-rose-400' }}">
+                {{ '已配置' if config.youtube_api.api_key else '未配置' }}
+            </span>
+        </div>
+        
+        {% if config.youtube_api.api_key %}
+        <div class="text-sm text-zinc-500 space-y-2">
+            <div>API Key: {{ config.youtube_api.api_key[:15] }}...</div>
+            <div>状态: {{ '启用' if config.youtube_api.enabled else '禁用' }}</div>
+        </div>
+        {% else %}
+        <div class="text-sm text-zinc-500">
+            <p class="mb-3">请在 config.yaml 中配置 YouTube API Key</p>
+            <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-300 transition-colors text-sm">
+                获取 API Key
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+        </div>
+        {% endif %}
     </div>
 
-    <!-- 邮件配置 -->
-    <div class="card">
-        <h3>📧 邮件发送</h3>
-        <div style="margin-top: 1rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-                <span class="status-dot {{ 'online' if config.email.smtp.user else 'offline' }}"></span>
-                <span>{{ config.email.mode }}</span>
+    <!-- Email Config -->
+    <div class="glass rounded-2xl p-6 border border-zinc-800">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <i data-lucide="mail" class="w-5 h-5 text-emerald-400"></i>
             </div>
-            {% if config.email.smtp.user %}
-            <div style="font-size: 0.9rem; color: #666;">
-                <div>SMTP服务器: {{ config.email.smtp.host }}</div>
-                <div style="margin-top: 0.5rem;">发件人: {{ config.email.smtp.user }}</div>
-            </div>
-            {% else %}
-            <div style="font-size: 0.9rem; color: #666;">
-                <p>当前使用模拟模式，邮件不会实际发送</p>
-                <p style="margin-top: 0.5rem;">请在 config.yaml 中配置 SMTP 以启用真实发送</p>
-            </div>
-            {% endif %}
+            <h3 class="font-semibold">邮件发送</h3>
         </div>
+        
+        <div class="flex items-center gap-2 mb-4">
+            <span class="w-2 h-2 rounded-full {{ 'bg-emerald-500 shadow-lg shadow-emerald-500/50' if config.email.smtp.user else 'bg-amber-500' }}"></span>
+            <span class="text-sm {{ 'text-emerald-400' if config.email.smtp.user else 'text-amber-400' }}">
+                {{ config.email.mode }}
+            </span>
+        </div>
+        
+        {% if config.email.smtp.user %}
+        <div class="text-sm text-zinc-500 space-y-2">
+            <div>SMTP: {{ config.email.smtp.host }}</div>
+            <div>发件人: {{ config.email.smtp.user }}</div>
+        </div>
+        {% else %}
+        <div class="text-sm text-zinc-500">
+            <p class="mb-3">当前使用模拟模式，邮件不会实际发送</p>
+            <p>请在 config.yaml 中配置 SMTP 以启用真实发送</p>
+        </div>
+        {% endif %}
     </div>
 
-    <!-- LLM配置 -->
-    <div class="card">
-        <h3>🤖 AI/LLM</h3>
-        <div style="margin-top: 1rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-                <span class="status-dot {{ 'online' if llm_available else 'offline' }}"></span>
-                <span>{{ '已配置' if llm_available else '未配置' }}</span>
+    <!-- LLM Config -->
+    <div class="glass rounded-2xl p-6 border border-zinc-800">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+                <i data-lucide="brain" class="w-5 h-5 text-indigo-400"></i>
             </div>
-            {% if llm_available %}
-            <div style="font-size: 0.9rem; color: #666;">
-                <div>提供商: {{ llm_provider }}</div>
-                <div style="margin-top: 0.5rem;">模型: {{ llm_model }}</div>
+            <h3 class="font-semibold">AI / LLM</h3>
+        </div>
+        
+        <div class="flex items-center gap-2 mb-4">
+            <span class="w-2 h-2 rounded-full {{ 'bg-emerald-500 shadow-lg shadow-emerald-500/50' if llm_available else 'bg-rose-500' }}"></span>
+            <span class="text-sm {{ 'text-emerald-400' if llm_available else 'text-rose-400' }}">
+                {{ '已配置' if llm_available else '未配置' }}
+            </span>
+        </div>
+        
+        {% if llm_available %}
+        <div class="text-sm text-zinc-500 space-y-2">
+            <div>提供商: {{ llm_provider }}</div>
+            <div>模型: {{ llm_model }}</div>
+        </div>
+        {% else %}
+        <div class="text-sm text-zinc-500">
+            <p class="mb-3">配置 LLM 以启用 AI 邮件生成和谈判回复</p>
+            <div class="p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                <div class="text-xs text-zinc-400 mb-2">环境变量 (推荐 DeepSeek):</div>
+                <code class="text-xs text-indigo-400 block">LLM_PROVIDER=deepseek</code>
+                <code class="text-xs text-indigo-400 block">DEEPSEEK_API_KEY=sk-...</code>
+                <code class="text-xs text-indigo-400 block">LLM_MODEL=deepseek-chat</code>
             </div>
-            {% else %}
-            <div style="font-size: 0.9rem; color: #666;">
-                <p>配置 LLM 以启用 AI 邮件生成和谈判回复</p>
-                <p style="margin-top: 0.5rem;">支持: DeepSeek, OpenAI, Anthropic Claude, 阿里云百炼</p>
-                <div style="margin-top: 1rem; padding: 1rem; background: #f9fafb; border-radius: 8px;">
-                    <div style="font-weight: 600; margin-bottom: 0.5rem;">环境变量 (推荐DeepSeek):</div>
-                    <code style="font-size: 0.8rem;">LLM_PROVIDER=deepseek</code><br>
-                    <code style="font-size: 0.8rem;">DEEPSEEK_API_KEY=sk-...</code><br>
-                    <code style="font-size: 0.8rem;">LLM_MODEL=deepseek-chat</code>
-                </div>
-            </div>
-            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Config Files -->
+<div class="glass rounded-2xl p-6 border border-zinc-800 mb-8">
+    <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+            <i data-lucide="file-code" class="w-5 h-5 text-zinc-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold">配置文件</h3>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+            <div class="text-sm font-medium text-zinc-300 mb-1">config.yaml</div>
+            <div class="text-xs text-zinc-500">主配置文件</div>
+        </div>
+        <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+            <div class="text-sm font-medium text-zinc-300 mb-1">.env</div>
+            <div class="text-xs text-zinc-500">环境变量文件（从 .env.example 复制并修改）</div>
         </div>
     </div>
 </div>
 
-<div class="card" style="margin-top: 1.5rem;">
-    <h3>📄 配置文件</h3>
-    <p style="color: #666; margin-top: 0.5rem;">
-        配置文件路径: <code>config.yaml</code>
-    </p>
-    <p style="color: #666; margin-top: 0.5rem;">
-        环境变量文件: <code>.env</code> (从 .env.example 复制并修改)
-    </p>
+<!-- Feature Status -->
+<div class="glass rounded-2xl p-6 border border-zinc-800">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+            <i data-lucide="list-checks" class="w-5 h-5 text-indigo-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold">功能状态</h3>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="table-dark">
+            <thead>
+                <tr>
+                    <th class="rounded-l-lg">功能</th>
+                    <th>所需配置</th>
+                    <th class="rounded-r-lg">状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>YouTube 数据采集</td>
+                    <td class="text-zinc-500">YouTube API Key</td>
+                    <td>
+                        {% if config.youtube_api.api_key %}
+                        <span class="inline-flex items-center gap-1 text-emerald-400">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            已启用
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1 text-rose-400">
+                            <i data-lucide="x-circle" class="w-4 h-4"></i>
+                            未配置
+                        </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>YouTube 创作者搜索</td>
+                    <td class="text-zinc-500">YouTube API Key</td>
+                    <td>
+                        {% if config.youtube_api.api_key %}
+                        <span class="inline-flex items-center gap-1 text-emerald-400">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            已启用
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1 text-rose-400">
+                            <i data-lucide="x-circle" class="w-4 h-4"></i>
+                            未配置
+                        </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>邮件发送</td>
+                    <td class="text-zinc-500">SMTP 或 SendGrid</td>
+                    <td>
+                        {% if config.email.smtp.user %}
+                        <span class="inline-flex items-center gap-1 text-emerald-400">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            已启用
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1 text-amber-400">
+                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                            模拟模式
+                        </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>AI 邮件生成</td>
+                    <td class="text-zinc-500">DeepSeek / OpenAI / Anthropic API Key</td>
+                    <td>
+                        {% if llm_available %}
+                        <span class="inline-flex items-center gap-1 text-emerald-400">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            已启用
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1 text-rose-400">
+                            <i data-lucide="x-circle" class="w-4 h-4"></i>
+                            未配置
+                        </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>AI 谈判回复</td>
+                    <td class="text-zinc-500">DeepSeek / OpenAI / Anthropic API Key</td>
+                    <td>
+                        {% if llm_available %}
+                        <span class="inline-flex items-center gap-1 text-emerald-400">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            已启用
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1 text-rose-400">
+                            <i data-lucide="x-circle" class="w-4 h-4"></i>
+                            未配置
+                        </span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<div class="card" style="margin-top: 1.5rem;">
-    <h3>🔧 功能说明</h3>
-    <table style="margin-top: 1rem;">
-        <thead>
-            <tr>
-                <th>功能</th>
-                <th>所需配置</th>
-                <th>状态</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>YouTube数据采集</td>
-                <td>YouTube API Key</td>
-                <td>{{ '✅' if config.youtube_api.api_key else '❌' }}</td>
-            </tr>
-            <tr>
-                <td>YouTube创作者搜索</td>
-                <td>YouTube API Key</td>
-                <td>{{ '✅' if config.youtube_api.api_key else '❌' }}</td>
-            </tr>
-            <tr>
-                <td>邮件发送</td>
-                <td>SMTP 或 SendGrid</td>
-                <td>{{ '✅' if config.email.smtp.user else '⚠️ 模拟模式' }}</td>
-            </tr>
-            <tr>
-                <td>AI邮件生成</td>
-                <td>DeepSeek / OpenAI / Anthropic / 阿里云百炼 API Key</td>
-                <td>{{ '✅' if llm_available else '❌' }}</td>
-            </tr>
-            <tr>
-                <td>AI谈判回复</td>
-                <td>DeepSeek / OpenAI / Anthropic / 阿里云百炼 API Key</td>
-                <td>{{ '✅' if llm_available else '❌' }}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+<script>
+    lucide.createIcons();
+</script>
 {% endblock %}

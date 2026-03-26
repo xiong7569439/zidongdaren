@@ -1,71 +1,162 @@
 {% extends "base.html" %}
 
+{% block title %}仪表盘 - KOL Nexus{% endblock %}
+{% block page_title %}仪表盘{% endblock %}
+
 {% block content %}
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-number">{{ stats.total_leads }}</div>
-        <div class="stat-label">总线索数</div>
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Total Leads -->
+    <div class="glass rounded-2xl p-6 card-hover border border-zinc-800">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+                <i data-lucide="users" class="w-6 h-6 text-indigo-400"></i>
+            </div>
+            <span class="text-xs text-zinc-500 bg-zinc-800/50 px-2 py-1 rounded-full">总计</span>
+        </div>
+        <div class="text-3xl font-bold text-zinc-50 mb-1">{{ stats.total_leads }}</div>
+        <div class="text-sm text-zinc-400">总线索数</div>
     </div>
-    <div class="stat-card">
-        <div class="stat-number">{{ stats.by_stage.get('negotiating', 0) + stats.by_stage.get('outreach_sent', 0) }}</div>
-        <div class="stat-label">进行中</div>
+    
+    <!-- In Progress -->
+    <div class="glass rounded-2xl p-6 card-hover border border-zinc-800">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                <i data-lucide="activity" class="w-6 h-6 text-amber-400"></i>
+            </div>
+            <span class="text-xs text-zinc-500 bg-zinc-800/50 px-2 py-1 rounded-full">活跃</span>
+        </div>
+        <div class="text-3xl font-bold text-zinc-50 mb-1">{{ stats.by_stage.get('negotiating', 0) + stats.by_stage.get('outreach_sent', 0) }}</div>
+        <div class="text-sm text-zinc-400">进行中</div>
     </div>
-    <div class="stat-card">
-        <div class="stat-number">{{ stats.by_stage.get('closed_won', 0) }}</div>
-        <div class="stat-label">已成交</div>
+    
+    <!-- Closed Won -->
+    <div class="glass rounded-2xl p-6 card-hover border border-zinc-800">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <i data-lucide="check-circle" class="w-6 h-6 text-emerald-400"></i>
+            </div>
+            <span class="text-xs text-emerald-500/70 bg-emerald-500/10 px-2 py-1 rounded-full">+{{ stats.by_stage.get('closed_won', 0) }}</span>
+        </div>
+        <div class="text-3xl font-bold text-zinc-50 mb-1">{{ stats.by_stage.get('closed_won', 0) }}</div>
+        <div class="text-sm text-zinc-400">已成交</div>
     </div>
-    <div class="stat-card">
-        <div class="stat-number">{{ stats.by_stage.get('closed_lost', 0) }}</div>
-        <div class="stat-label">未成交</div>
+    
+    <!-- Closed Lost -->
+    <div class="glass rounded-2xl p-6 card-hover border border-zinc-800">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center">
+                <i data-lucide="x-circle" class="w-6 h-6 text-rose-400"></i>
+            </div>
+            <span class="text-xs text-zinc-500 bg-zinc-800/50 px-2 py-1 rounded-full">流失</span>
+        </div>
+        <div class="text-3xl font-bold text-zinc-50 mb-1">{{ stats.by_stage.get('closed_lost', 0) }}</div>
+        <div class="text-sm text-zinc-400">未成交</div>
     </div>
 </div>
 
-<div class="card">
-    <h2>⚙️ 系统状态</h2>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-        <div style="padding: 1rem; background: #f9fafb; border-radius: 8px;">
-            <strong>YouTube API</strong>
-            <div class="status-indicator" style="margin-top: 0.5rem;">
-                <span class="status-dot {{ 'online' if stats.api_configured else 'offline' }}"></span>
-                <span>{{ '已配置' if stats.api_configured else '未配置' }}</span>
+<!-- System Status & Pipeline -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <!-- System Status -->
+    <div class="glass rounded-2xl p-6 border border-zinc-800">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+                <i data-lucide="cpu" class="w-5 h-5 text-indigo-400"></i>
+            </div>
+            <h3 class="text-lg font-semibold">系统状态</h3>
+        </div>
+        
+        <div class="space-y-4">
+            <!-- YouTube API -->
+            <div class="flex items-center justify-between p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full {{ 'bg-emerald-500 shadow-lg shadow-emerald-500/50' if stats.api_configured else 'bg-rose-500' }}"></div>
+                    <span class="text-sm font-medium">YouTube API</span>
+                </div>
+                <span class="text-xs px-2 py-1 rounded-full {{ 'bg-emerald-500/10 text-emerald-400' if stats.api_configured else 'bg-rose-500/10 text-rose-400' }}">
+                    {{ '已配置' if stats.api_configured else '未配置' }}
+                </span>
+            </div>
+            
+            <!-- Email -->
+            <div class="flex items-center justify-between p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full {{ 'bg-emerald-500 shadow-lg shadow-emerald-500/50' if stats.email_configured else 'bg-rose-500' }}"></div>
+                    <span class="text-sm font-medium">邮件发送</span>
+                </div>
+                <span class="text-xs px-2 py-1 rounded-full {{ 'bg-emerald-500/10 text-emerald-400' if stats.email_configured else 'bg-rose-500/10 text-rose-400' }}">
+                    {{ '已配置' if stats.email_configured else '未配置' }}
+                </span>
+            </div>
+            
+            <!-- AI/LLM -->
+            <div class="flex items-center justify-between p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full {{ 'bg-emerald-500 shadow-lg shadow-emerald-500/50' if stats.llm_configured else 'bg-rose-500' }}"></div>
+                    <span class="text-sm font-medium">AI / LLM</span>
+                </div>
+                <span class="text-xs px-2 py-1 rounded-full {{ 'bg-emerald-500/10 text-emerald-400' if stats.llm_configured else 'bg-rose-500/10 text-rose-400' }}">
+                    {{ '已配置' if stats.llm_configured else '未配置' }}
+                </span>
             </div>
         </div>
-        <div style="padding: 1rem; background: #f9fafb; border-radius: 8px;">
-            <strong>邮件发送</strong>
-            <div class="status-indicator" style="margin-top: 0.5rem;">
-                <span class="status-dot {{ 'online' if stats.email_configured else 'offline' }}"></span>
-                <span>{{ '已配置' if stats.email_configured else '未配置' }}</span>
+    </div>
+    
+    <!-- Pipeline Distribution -->
+    <div class="lg:col-span-2 glass rounded-2xl p-6 border border-zinc-800">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5 text-indigo-400"></i>
+                </div>
+                <h3 class="text-lg font-semibold">Pipeline 分布</h3>
             </div>
+            <a href="{{ url_for('leads') }}" class="text-sm text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1">
+                查看全部
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
         </div>
-        <div style="padding: 1rem; background: #f9fafb; border-radius: 8px;">
-            <strong>AI/LLM</strong>
-            <div class="status-indicator" style="margin-top: 0.5rem;">
-                <span class="status-dot {{ 'online' if stats.llm_configured else 'offline' }}"></span>
-                <span>{{ '已配置' if stats.llm_configured else '未配置' }}</span>
-            </div>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {% for stage, count in stats.by_stage.items() %}
+                {% if count > 0 %}
+                <div class="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800 hover:border-indigo-500/30 transition-colors group">
+                    <div class="text-2xl font-bold gradient-text mb-1 group-hover:scale-110 transition-transform inline-block">{{ count }}</div>
+                    <div class="text-xs text-zinc-500 truncate">{{ stage }}</div>
+                </div>
+                {% endif %}
+            {% endfor %}
         </div>
     </div>
 </div>
 
-<div class="card">
-    <h2>📊 Pipeline分布</h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;">
-        {% for stage, count in stats.by_stage.items() %}
-            {% if count > 0 %}
-            <div style="text-align: center; padding: 1rem; background: #f9fafb; border-radius: 8px;">
-                <div style="font-size: 1.5rem; font-weight: 700; color: #667eea;">{{ count }}</div>
-                <div style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">{{ stage }}</div>
-            </div>
-            {% endif %}
-        {% endfor %}
+<!-- Quick Actions -->
+<div class="glass rounded-2xl p-6 border border-zinc-800">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center">
+            <i data-lucide="zap" class="w-5 h-5 text-amber-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold">快速操作</h3>
+    </div>
+    
+    <div class="flex flex-wrap gap-4">
+        <a href="{{ url_for('new_lead') }}" class="btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            创建新线索
+        </a>
+        <a href="{{ url_for('leads') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-zinc-50 transition-all border border-zinc-700">
+            <i data-lucide="list" class="w-5 h-5"></i>
+            查看所有线索
+        </a>
+        <a href="{{ url_for('search_creators') }}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-zinc-50 transition-all border border-zinc-700">
+            <i data-lucide="search" class="w-5 h-5"></i>
+            搜索创作者
+        </a>
     </div>
 </div>
 
-<div class="card">
-    <h2>🚀 快速操作</h2>
-    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-        <a href="{{ url_for('new_lead') }}" class="btn btn-primary">➕ 创建新线索</a>
-        <a href="{{ url_for('leads') }}" class="btn btn-secondary">📋 查看所有线索</a>
-    </div>
-</div>
+<script>
+    // Re-initialize icons for dynamically added content
+    lucide.createIcons();
+</script>
 {% endblock %}
