@@ -6,6 +6,7 @@ from typing import List, Optional, Dict, Any
 from dataclasses import dataclass
 import smtplib
 import ssl
+import socket
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
@@ -159,9 +160,12 @@ class EmailTool:
             context = ssl.create_default_context()
             
             # 根据配置选择SSL或STARTTLS
+            # 设置超时时间为30秒，防止网络问题导致无限等待
+            timeout = 30
+            
             if self.use_ssl:
                 # SSL连接（阿里云企业邮箱等）
-                with smtplib.SMTP_SSL(self.smtp_host, self.smtp_port, context=context) as server:
+                with smtplib.SMTP_SSL(self.smtp_host, self.smtp_port, context=context, timeout=timeout) as server:
                     server.login(self.smtp_user, self.smtp_password)
                     
                     recipients = [message.to_addr]
@@ -177,7 +181,7 @@ class EmailTool:
                     )
             else:
                 # STARTTLS连接（标准SMTP）
-                with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
+                with smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=timeout) as server:
                     if self.use_tls:
                         server.starttls(context=context)
                     
@@ -204,6 +208,12 @@ class EmailTool:
                 "method": "smtp"
             }
             
+        except socket.timeout:
+            return {
+                "status": "error",
+                "error": "SMTP连接超时，请检查网络或SMTP服务器配置",
+                "error_type": "smtp_timeout"
+            }
         except smtplib.SMTPAuthenticationError as e:
             return {
                 "status": "error",
