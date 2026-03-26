@@ -68,6 +68,10 @@ class EmailTool:
         elif self.smtp_port == 587:
             self.use_ssl = False
             self.use_tls = True
+        else:
+            # 默认使用STARTTLS
+            self.use_ssl = False
+            self.use_tls = True
         
         # SendGrid配置
         self.sendgrid_api_key = sendgrid_api_key
