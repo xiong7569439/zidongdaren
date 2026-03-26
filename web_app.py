@@ -446,12 +446,19 @@ def compose_email(channel_url):
             flash("邮件主题和正文不能为空", "error")
             return redirect(url_for("compose_email", channel_url=channel_url))
         
+        # 调试：检查当前邮件工具状态
+        current_stats = email_tool.get_stats()
+        print(f"[Send Email] 当前模式: {'模拟' if current_stats.get('mock_mode') else '真实'}")
+        print(f"[Send Email] SendGrid配置: {current_stats.get('sendgrid_configured', False)}")
+        
         send_result = email_tool.send_outreach_email(
             to_addr=to_addr,
             creator_name=ctx.creator_name,
             subject=subject,
             body=body
         )
+        
+        print(f"[Send Email] 发送结果: {send_result}")
         
         if send_result["status"] == "success":
             # 更新状态（如果当前状态允许流转到 OUTREACH_SENT）
