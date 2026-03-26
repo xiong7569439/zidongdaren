@@ -112,12 +112,13 @@
                             <span style="font-size: 0.75rem; opacity: 0.9; margin-left: 0.5rem;">(Click to send via system)</span>
                         </button>
                     </form>
-                    <!-- 备用：使用系统默认邮件客户端 -->
-                    <a href="mailto:{{ email }}" 
-                       style="font-size: 0.8rem; color: #92400e; text-decoration: underline;"
-                       title="Open in your default email client">
-                        ↗️ Open in mail app
-                    </a>
+                    <!-- 复制邮箱地址 -->
+                    <button type="button" 
+                            onclick="navigator.clipboard.writeText('{{ email }}').then(() => { this.innerText='✅ 已复制!'; setTimeout(() => this.innerText='📋 复制邮箱', 2000); })"
+                            style="font-size: 0.8rem; color: #92400e; text-decoration: underline; background: none; border: none; cursor: pointer; padding: 0;"
+                            title="复制邮箱地址到剪贴板">
+                        📋 复制邮箱
+                    </button>
                 </div>
                 {% endfor %}
             </div>
@@ -153,12 +154,13 @@
                             <span style="font-size: 0.75rem; opacity: 0.9; margin-left: 0.5rem;">(Click to send via system)</span>
                         </button>
                     </form>
-                    <!-- 备用：使用系统默认邮件客户端 -->
-                    <a href="mailto:{{ email }}" 
-                       style="font-size: 0.8rem; color: #92400e; text-decoration: underline;"
-                       title="Open in your default email client">
-                        ↗️ Open in mail app
-                    </a>
+                    <!-- 复制邮箱地址 -->
+                    <button type="button" 
+                            onclick="navigator.clipboard.writeText('{{ email }}').then(() => { this.innerText='✅ 已复制!'; setTimeout(() => this.innerText='📋 复制邮箱', 2000); })"
+                            style="font-size: 0.8rem; color: #92400e; text-decoration: underline; background: none; border: none; cursor: pointer; padding: 0;"
+                            title="复制邮箱地址到剪贴板">
+                        📋 复制邮箱
+                    </button>
                 </div>
                 {% endfor %}
             </div>
