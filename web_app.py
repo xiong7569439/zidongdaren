@@ -61,9 +61,17 @@ email_sender = os.getenv("EMAIL_SENDER")
 email_password = os.getenv("EMAIL_PASSWORD")
 email_smtp_host = os.getenv("EMAIL_SMTP_HOST")
 email_smtp_port = int(os.getenv("EMAIL_SMTP_PORT", "587"))
+sendgrid_api_key = os.getenv("SENDGRID_API_KEY")
 
-if email_sender and email_password and email_smtp_host:
-    # 使用环境变量配置的邮箱
+if sendgrid_api_key and email_sender:
+    # 优先使用 SendGrid（避免Railway端口限制）
+    email_tool = EmailTool(
+        sendgrid_api_key=sendgrid_api_key,
+        mock_mode=False
+    )
+    print(f"✓ 邮件工具: SendGrid 已配置 ({email_sender})")
+elif email_sender and email_password and email_smtp_host:
+    # 使用 SMTP 配置
     email_tool = EmailTool(
         smtp_host=email_smtp_host,
         smtp_port=email_smtp_port,
@@ -71,7 +79,7 @@ if email_sender and email_password and email_smtp_host:
         smtp_password=email_password,
         mock_mode=False
     )
-    print(f"✓ 邮件工具: 已配置 ({email_sender})")
+    print(f"✓ 邮件工具: SMTP 已配置 ({email_sender})")
 elif config.email.mode == "smtp" and config.email.smtp.user:
     email_tool = EmailTool(
         smtp_host=config.email.smtp.host,
@@ -80,7 +88,7 @@ elif config.email.mode == "smtp" and config.email.smtp.user:
         smtp_password=config.email.smtp.password,
         mock_mode=False
     )
-    print(f"✓ 邮件工具: 已配置 ({config.email.smtp.user})")
+    print(f"✓ 邮件工具: SMTP 已配置 ({config.email.smtp.user})")
 else:
     email_tool = EmailTool(mock_mode=True)
     print("✓ 邮件工具: 模拟模式")

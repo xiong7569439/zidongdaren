@@ -72,8 +72,9 @@ class EmailTool:
         # SendGrid配置
         self.sendgrid_api_key = sendgrid_api_key
         
-        # 模式 - 如果有SMTP配置则禁用模拟模式
-        self.mock_mode = mock_mode if not self.is_smtp_configured() else False
+        # 模式 - 如果有SMTP或SendGrid配置则禁用模拟模式
+        is_configured = self.is_smtp_configured() or self.is_sendgrid_configured()
+        self.mock_mode = mock_mode if not is_configured else False
         
         # 记录
         self.sent_emails: List[EmailMessage] = []
