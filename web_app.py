@@ -561,6 +561,26 @@ def record_contact_attempt(channel_url):
         flash("请填写联系渠道和联系方式", "error")
         return redirect(url_for("lead_detail", channel_url=channel_url))
     
+    # 如果是邮箱类型，自动添加到 contact_candidates 并设为推荐联系方式
+    if channel == "email" and "@" in to_value:
+        # 检查是否已存在
+        existing = [c for c in ctx.contact_candidates if c.get("value") == to_value]
+        if not existing:
+            ctx.contact_candidates.append({
+                "type": "business_email",
+                "value": to_value,
+                "source": "manual_record",
+                "confidence": 0.85,
+                "notes": content_note or "Manually recorded"
+            })
+        # 设置为推荐联系方式
+        ctx.recommended_contact = {
+            "type": "business_email",
+            "value": to_value,
+            "source": "manual_record",
+            "confidence": 0.85
+        }
+    
     attempt = {
         "id": f"attempt_{len(ctx.contact_attempts) + 1}",
         "channel": channel,
@@ -694,8 +714,29 @@ def send_followup_email(channel_url):
         flash("请先启动邮件序列", "error")
         return redirect(url_for("lead_detail", channel_url=channel_url))
     
+    # 检查是否有手动输入的邮箱
+    manual_email = request.form.get("manual_email", "").strip()
+    if manual_email:
+        # 使用手动输入的邮箱作为推荐联系方式
+        ctx.recommended_contact = {
+            "type": "business_email",
+            "value": manual_email,
+            "source": "manual_input",
+            "confidence": 0.8
+        }
+        # 同时添加到联系候选人列表
+        existing = [c for c in ctx.contact_candidates if c.get("value") == manual_email]
+        if not existing:
+            ctx.contact_candidates.append({
+                "type": "business_email",
+                "value": manual_email,
+                "source": "manual_input",
+                "confidence": 0.8,
+                "notes": "Manually entered for follow-up"
+            })
+    
     if not ctx.recommended_contact:
-        flash("未找到联系方式", "error")
+        flash("未找到联系方式，请手动输入邮箱", "error")
         return redirect(url_for("lead_detail", channel_url=channel_url))
     
     seq = ctx.email_sequence

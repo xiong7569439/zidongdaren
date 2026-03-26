@@ -452,7 +452,13 @@
         </div>
         
         {% if not seq.completed and not seq.stopped_reason %}
-        <form method="POST" action="/leads/{{ context.channel_url }}/send_followup">
+        <form method="POST" action="/leads/{{ context.channel_url }}/send_followup" style="margin-top:1rem;">
+            {% if not recommended_contact %}
+            <div style="margin-bottom:0.75rem; padding:0.75rem; background:#fef3c7; border-radius:6px; border:1px solid #f59e0b;">
+                <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color:#92400e;">⚠️ 未找到推荐联系方式，请手动输入邮箱：</p>
+                <input type="email" name="manual_email" placeholder="输入创作者邮箱" class="form-control" style="width:300px;" required>
+            </div>
+            {% endif %}
             <button type="submit" class="btn btn-primary">📤 立即发送当前跟进</button>
         </form>
         {% endif %}
