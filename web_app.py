@@ -316,8 +316,9 @@ def lead_detail(channel_url):
     ctx = active_leads.get(channel_url)
     
     if not ctx:
-        flash("线索不存在", "error")
-        return redirect(url_for("leads"))
+        # 服务重启后内存丢失，自动重建线索（空画像）
+        ctx = orchestrator.create_lead(channel_url, "")
+        active_leads[channel_url] = ctx
     
     # 获取邮件工具状态
     email_mock_mode = True
@@ -350,7 +351,9 @@ def collect_data(channel_url):
     ctx = active_leads.get(channel_url)
     
     if not ctx:
-        return jsonify({"status": "error", "message": "线索不存在"})
+        # 服务重启后内存丢失，自动重建线索再采集
+        ctx = orchestrator.create_lead(channel_url, "")
+        active_leads[channel_url] = ctx
     
     if not youtube_api or not youtube_api.is_available():
         flash("YouTube API未配置", "error")
@@ -1158,7 +1161,17 @@ def get_available_actions(ctx: PipelineContext) -> List[Dict]:
                 "method": "POST"
             })
     
-    elif stage == PipelineStage.DATA_READY:
+    # 已采集数据的线索可以重新采集（用于更新About信息等）
+    if stage.value in ['data_ready', 'pricing_drafted', 'contact_finding']:
+        if youtube_api and youtube_api.is_available():
+            actions.append({
+                "name": "collect_data",
+                "label": "🔄 重新采集",
+                "url": f"/leads/{ctx.channel_url}/collect",
+                "method": "POST"
+            })
+    
+    if stage == PipelineStage.DATA_READY:
         actions.append({
             "name": "calculate_price",
             "label": "💰 计算报价",
@@ -1166,7 +1179,7 @@ def get_available_actions(ctx: PipelineContext) -> List[Dict]:
             "method": "POST"
         })
     
-    elif stage == PipelineStage.PRICING_DRAFTED:
+    if stage == PipelineStage.PRICING_DRAFTED:
         actions.append({
             "name": "find_contact",
             "label": "🔍 查找联系方式",
@@ -1174,7 +1187,7 @@ def get_available_actions(ctx: PipelineContext) -> List[Dict]:
             "method": "POST"
         })
     
-    elif stage == PipelineStage.CONTACT_FINDING:
+    if stage == PipelineStage.CONTACT_FINDING:
         if ctx.recommended_contact and email_tool:
             actions.append({
                 "name": "send_email",

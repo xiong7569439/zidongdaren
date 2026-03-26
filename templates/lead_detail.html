@@ -81,6 +81,14 @@
             {% endif %}
         </form>
         {% endfor %}
+        
+        <!-- 始终显示重新采集按钮 -->
+        <form method="POST" action="/leads/{{ context.channel_url }}/collect" class="inline-flex">
+            <button type="submit" class="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition-all">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                🔄 重新采集
+            </button>
+        </form>
     </div>
 </div>
 {% endif %}

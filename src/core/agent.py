@@ -143,6 +143,9 @@ class DataCollectionAgent(BaseAgent):
         if use_api and self.youtube_api and self.youtube_api.is_available():
             result = self.youtube_api.get_channel_by_url(channel_url)
             if result.get("status") == "success":
+                # API获取基本信息后，仍需抓取About页面获取详细说明和链接
+                about_info = self._fetch_about_page(channel_url)
+                result.update(about_info)
                 return result
         
         # 回退到网页抓取

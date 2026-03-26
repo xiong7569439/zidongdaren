@@ -5,27 +5,317 @@
 
 {% block extra_css %}
 <style>
+    /* Template Card Styles */
     .template-card {
-        transition: all 0.2s ease;
+        background: rgba(24, 24, 27, 0.6);
+        border: 1px solid rgba(63, 63, 70, 0.5);
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .template-card:hover {
+        transform: translateY(-4px);
         border-color: rgba(99, 102, 241, 0.3);
+        box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+    }
+    
+    .template-card.active {
+        border-color: rgba(99, 102, 241, 0.5);
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+    
+    /* Template Header */
+    .template-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        background: rgba(39, 39, 42, 0.4);
+        border-bottom: 1px solid rgba(63, 63, 70, 0.3);
+    }
+    
+    .template-number {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+    }
+    
+    .template-title {
+        font-weight: 600;
+        color: #fafafa;
+        font-size: 0.95rem;
+    }
+    
+    /* Badge Styles */
+    .template-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .template-badge.recommended {
+        background: rgba(99, 102, 241, 0.15);
+        color: #818cf8;
+        border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    
+    .template-badge.high-open {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .template-badge.follow-up {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    
+    .template-badge.popular {
+        background: rgba(244, 63, 94, 0.15);
+        color: #fb7185;
+        border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+    
+    /* Meta Tags */
+    .template-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border-bottom: 1px solid rgba(63, 63, 70, 0.2);
+    }
+    
+    .meta-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.5rem;
+        background: rgba(63, 63, 70, 0.4);
+        border: 1px solid rgba(63, 63, 70, 0.5);
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        color: #a1a1aa;
+    }
+    
+    /* Subject Line */
+    .subject-line {
+        padding: 1rem 1.25rem;
+        background: rgba(9, 9, 11, 0.4);
+        border-bottom: 1px solid rgba(63, 63, 70, 0.2);
+    }
+    
+    .subject-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #71717a;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .subject-content {
+        font-size: 0.875rem;
+        color: #d4d4d8;
+        line-height: 1.6;
+    }
+    
+    /* Email Content */
+    .email-content-wrapper {
+        padding: 1.25rem;
+        background: rgba(9, 9, 11, 0.6);
     }
     
     .email-content {
-        font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        font-size: 0.8rem;
+        line-height: 1.7;
+        color: #e4e4e7;
         white-space: pre-wrap;
         word-wrap: break-word;
+        max-height: 200px;
+        overflow-y: auto;
+        padding-right: 0.5rem;
     }
     
+    .email-content::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    .email-content::-webkit-scrollbar-thumb {
+        background: #3f3f46;
+        border-radius: 2px;
+    }
+    
+    /* Variable Highlight */
+    .var-highlight {
+        background: rgba(99, 102, 241, 0.2);
+        color: #a5b4fc;
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.25rem;
+        font-weight: 500;
+        border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    
+    .var-replaced {
+        background: rgba(16, 185, 129, 0.2);
+        color: #6ee7b7;
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.25rem;
+        font-weight: 500;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    /* Template Actions */
+    .template-actions {
+        display: flex;
+        gap: 0.5rem;
+        padding: 1rem 1.25rem;
+        background: rgba(39, 39, 42, 0.3);
+        border-top: 1px solid rgba(63, 63, 70, 0.2);
+    }
+    
+    .btn-copy {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(63, 63, 70, 0.5);
+        border: 1px solid rgba(63, 63, 70, 0.6);
+        border-radius: 0.5rem;
+        color: #d4d4d8;
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-copy:hover {
+        background: rgba(99, 102, 241, 0.2);
+        border-color: rgba(99, 102, 241, 0.4);
+        color: #fff;
+    }
+    
+    .btn-copy.copied {
+        background: rgba(16, 185, 129, 0.2);
+        border-color: rgba(16, 185, 129, 0.4);
+        color: #34d399;
+    }
+    
+    .btn-preview {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        border: none;
+        border-radius: 0.5rem;
+        color: white;
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-preview:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+    
+    /* Variable Panel */
+    .variable-panel {
+        background: rgba(24, 24, 27, 0.8);
+        border: 1px solid rgba(63, 63, 70, 0.5);
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+    
+    .variable-panel-header {
+        padding: 1rem 1.25rem;
+        background: rgba(39, 39, 42, 0.5);
+        border-bottom: 1px solid rgba(63, 63, 70, 0.3);
+    }
+    
+    .variable-form {
+        padding: 1.25rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #a1a1aa;
+        margin-bottom: 0.375rem;
+    }
+    
+    .form-label code {
+        background: rgba(99, 102, 241, 0.15);
+        color: #a5b4fc;
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 0.625rem 0.875rem;
+        background: rgba(9, 9, 11, 0.6);
+        border: 1px solid rgba(63, 63, 70, 0.6);
+        border-radius: 0.5rem;
+        color: #fafafa;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: rgba(99, 102, 241, 0.5);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    
+    .form-input::placeholder {
+        color: #52525b;
+    }
+    
+    .form-textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+    
+    /* Filter Tabs */
     .filter-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1rem;
+        background: rgba(39, 39, 42, 0.5);
+        border: 1px solid rgba(63, 63, 70, 0.5);
+        border-radius: 0.625rem;
+        color: #a1a1aa;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
         transition: all 0.2s ease;
     }
     
     .filter-tab:hover {
         background: rgba(99, 102, 241, 0.1);
         border-color: rgba(99, 102, 241, 0.3);
+        color: #e4e4e7;
     }
     
     .filter-tab.active {
@@ -33,221 +323,469 @@
         color: white;
         border-color: transparent;
     }
+    
+    /* Category Section */
+    .category-section {
+        margin-bottom: 2rem;
+    }
+    
+    .category-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #fafafa;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(63, 63, 70, 0.3);
+    }
+    
+    .category-icon {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(99, 102, 241, 0.15);
+        border-radius: 0.5rem;
+    }
+    
+    /* Quick Tool Cards */
+    .quick-tool-card {
+        display: flex;
+        flex-direction: column;
+        padding: 1.25rem;
+        background: rgba(24, 24, 27, 0.6);
+        border: 1px solid rgba(63, 63, 70, 0.5);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    
+    .quick-tool-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+    
+    .quick-tool-icon {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.75rem;
+        margin-bottom: 0.875rem;
+    }
+    
+    .quick-tool-title {
+        font-weight: 600;
+        color: #fafafa;
+        margin-bottom: 0.25rem;
+    }
+    
+    .quick-tool-desc {
+        font-size: 0.8rem;
+        color: #71717a;
+    }
+    
+    /* Preview Modal */
+    .preview-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+    
+    .preview-modal.active {
+        display: flex;
+    }
+    
+    .preview-content {
+        width: 100%;
+        max-width: 700px;
+        max-height: 80vh;
+        background: #18181b;
+        border: 1px solid rgba(63, 63, 70, 0.5);
+        border-radius: 1rem;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .preview-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        background: rgba(39, 39, 42, 0.5);
+        border-bottom: 1px solid rgba(63, 63, 70, 0.3);
+    }
+    
+    .preview-body {
+        padding: 1.5rem;
+        overflow-y: auto;
+        font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        font-size: 0.875rem;
+        line-height: 1.8;
+        color: #e4e4e7;
+        white-space: pre-wrap;
+    }
+    
+    .btn-close {
+        padding: 0.5rem;
+        background: rgba(63, 63, 70, 0.5);
+        border: none;
+        border-radius: 0.375rem;
+        color: #a1a1aa;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-close:hover {
+        background: rgba(244, 63, 94, 0.2);
+        color: #fb7185;
+    }
+    
+    /* Variable Legend */
+    .var-legend {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.5rem;
+        padding: 1rem;
+        background: rgba(9, 9, 11, 0.4);
+        border-radius: 0.75rem;
+        margin-top: 1rem;
+    }
+    
+    .var-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .var-code {
+        font-family: monospace;
+        background: rgba(99, 102, 241, 0.15);
+        color: #a5b4fc;
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+    }
+    
+    .var-desc {
+        color: #71717a;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .email-layout {
+            flex-direction: column;
+        }
+        
+        .variable-sidebar {
+            width: 100%;
+            position: static;
+        }
+    }
+    
+    @media (max-width: 640px) {
+        .template-actions {
+            flex-wrap: wrap;
+        }
+        
+        .template-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        
+        .filter-tabs {
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- Header -->
-<div class="glass rounded-2xl p-6 border border-zinc-800 mb-8">
+<div class="glass rounded-2xl p-6 border border-zinc-800 mb-6">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
             <h2 class="text-xl font-semibold mb-2">邮件话术模板库</h2>
-            <p class="text-sm text-zinc-500">快速访问所有邮件话术模板，支持一键复制</p>
+            <p class="text-sm text-zinc-500">快速访问所有邮件话术模板，支持变量替换和一键复制</p>
         </div>
-        <div class="flex items-center gap-2 text-sm text-zinc-400">
-            <i data-lucide="mail" class="w-4 h-4"></i>
-            发件邮箱: cooperate@topuplive.com
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/50 border border-zinc-800">
+                <i data-lucide="mail" class="w-4 h-4 text-indigo-400"></i>
+                <span class="text-sm text-zinc-400">发件邮箱:</span>
+                <span class="text-sm text-zinc-200 font-medium">cooperate@topuplive.com</span>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- Quick Tools -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <a href="#outreach" class="glass rounded-xl p-5 border border-zinc-800 hover:border-indigo-500/30 transition-all group">
-        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-3 group-hover:bg-indigo-500/20 transition-colors">
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+    <a href="#outreach" class="quick-tool-card group">
+        <div class="quick-tool-icon bg-indigo-500/10 group-hover:bg-indigo-500/20 transition-colors">
             <i data-lucide="send" class="w-5 h-5 text-indigo-400"></i>
         </div>
-        <div class="font-medium text-zinc-200 mb-1">首封触达</div>
-        <div class="text-xs text-zinc-500">首次联系创作者的标准话术</div>
+        <div class="quick-tool-title">首封触达</div>
+        <div class="quick-tool-desc">首次联系创作者</div>
     </a>
-    <a href="#followup" class="glass rounded-xl p-5 border border-zinc-800 hover:border-amber-500/30 transition-all group">
-        <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center mb-3 group-hover:bg-amber-500/20 transition-colors">
+    <a href="#followup" class="quick-tool-card group">
+        <div class="quick-tool-icon bg-amber-500/10 group-hover:bg-amber-500/20 transition-colors">
             <i data-lucide="refresh-cw" class="w-5 h-5 text-amber-400"></i>
         </div>
-        <div class="font-medium text-zinc-200 mb-1">跟进邮件</div>
-        <div class="text-xs text-zinc-500">48小时未回复后的跟进话术</div>
+        <div class="quick-tool-title">跟进邮件</div>
+        <div class="quick-tool-desc">48小时后跟进</div>
     </a>
-    <a href="#negotiation" class="glass rounded-xl p-5 border border-zinc-800 hover:border-emerald-500/30 transition-all group">
-        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-3 group-hover:bg-emerald-500/20 transition-colors">
+    <a href="#negotiation" class="quick-tool-card group">
+        <div class="quick-tool-icon bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors">
             <i data-lucide="message-square" class="w-5 h-5 text-emerald-400"></i>
         </div>
-        <div class="font-medium text-zinc-200 mb-1">谈判回复</div>
-        <div class="text-xs text-zinc-500">处理各种回复场景的应对话术</div>
+        <div class="quick-tool-title">谈判回复</div>
+        <div class="quick-tool-desc">应对各种回复</div>
     </a>
-    <a href="#brief" class="glass rounded-xl p-5 border border-zinc-800 hover:border-rose-500/30 transition-all group">
-        <div class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center mb-3 group-hover:bg-rose-500/20 transition-colors">
+    <a href="#brief" class="quick-tool-card group">
+        <div class="quick-tool-icon bg-rose-500/10 group-hover:bg-rose-500/20 transition-colors">
             <i data-lucide="file-text" class="w-5 h-5 text-rose-400"></i>
         </div>
-        <div class="font-medium text-zinc-200 mb-1">Brief/排期</div>
-        <div class="text-xs text-zinc-500">发送素材包和确认排期的话术</div>
+        <div class="quick-tool-title">Brief/排期</div>
+        <div class="quick-tool-desc">素材与排期确认</div>
     </a>
 </div>
 
-<!-- Search -->
-<div class="mb-6">
-    <div class="relative max-w-xl">
-        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500"></i>
-        <input type="text" 
-               id="templateSearch" 
-               class="form-control-dark w-full pl-12 pr-4 py-3 rounded-xl" 
-               placeholder="搜索邮件模板（如：首封、跟进、压价、Brief...）">
-    </div>
-</div>
-
-<!-- Filter Tabs -->
-<div class="flex flex-wrap gap-2 mb-8">
-    <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-zinc-700 bg-zinc-800/50 text-zinc-300 active" data-filter="all">全部</button>
-    <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-zinc-700 bg-zinc-800/50 text-zinc-300" data-filter="outreach">首封触达</button>
-    <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-zinc-700 bg-zinc-800/50 text-zinc-300" data-filter="followup">跟进</button>
-    <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-zinc-700 bg-zinc-800/50 text-zinc-300" data-filter="negotiation">谈判</button>
-    <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-zinc-700 bg-zinc-800/50 text-zinc-300" data-filter="brief">Brief/排期</button>
-    <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-zinc-700 bg-zinc-800/50 text-zinc-300" data-filter="closure">结束</button>
-</div>
-
-<!-- 首封触达 -->
-<div class="category-section" id="outreach" data-category="outreach">
-    <h3 class="category-title">📤 首封触达</h3>
-
-    <!-- 模板1: 标准首封 -->
-    <div class="template-card" data-keywords="首封 触达 标准 first outreach">
-        <div class="template-header">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span class="template-number">1</span>
-                <span class="template-title">首封触达（标准版）</span>
+<!-- Main Layout -->
+<div class="email-layout flex gap-6">
+    <!-- Templates Area -->
+    <div class="flex-1 min-w-0">
+        <!-- Search & Filter -->
+        <div class="glass rounded-2xl p-4 border border-zinc-800 mb-6">
+            <div class="flex flex-col sm:flex-row gap-4">
+                <!-- Search -->
+                <div class="relative flex-1">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500"></i>
+                    <input type="text" 
+                           id="templateSearch" 
+                           class="form-control-dark w-full pl-12 pr-4 py-3 rounded-xl" 
+                           placeholder="搜索邮件模板（如：首封、跟进、压价、Brief...）">
+                </div>
             </div>
-            <span class="badge badge-blue">推荐</span>
+            <!-- Filter Tabs -->
+            <div class="filter-tabs flex flex-wrap gap-2 mt-4">
+                <button class="filter-tab active" data-filter="all">
+                    <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                    全部
+                </button>
+                <button class="filter-tab" data-filter="outreach">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    首封触达
+                </button>
+                <button class="filter-tab" data-filter="followup">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    跟进
+                </button>
+                <button class="filter-tab" data-filter="negotiation">
+                    <i data-lucide="message-square" class="w-4 h-4"></i>
+                    谈判
+                </button>
+                <button class="filter-tab" data-filter="brief">
+                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                    Brief/排期
+                </button>
+                <button class="filter-tab" data-filter="closure">
+                    <i data-lucide="x-circle" class="w-4 h-4"></i>
+                    结束
+                </button>
+            </div>
         </div>
-        <div class="template-meta">
-            <span class="meta-tag">📧 邮件</span>
-            <span class="meta-tag">🎮 游戏合作</span>
-            <span class="meta-tag">💰 含报价</span>
-        </div>
-        <div class="subject-line">
-            <div class="subject-label">Subject 备选（选1）</div>
-            <div>1. Collaboration opportunity with {GAME_NAME} (YouTube integration)</div>
-            <div>2. Paid YouTube sponsorship for your next video?</div>
-            <div>3. Brand partnership: {GAME_NAME} + {CREATOR_NAME}</div>
-        </div>
-        <div class="email-content" id="template1">Hi {CREATOR_NAME},
 
-I'm {YOUR_NAME} from {COMPANY/BRAND}. We're working on {GAME_NAME} ({GENRE}, {PLATFORM}) and would love to explore a paid YouTube integration with you.
+        <!-- Templates -->
+        <div id="templatesContainer">
+            <!-- 首封触达 -->
+            <div class="category-section" id="outreach" data-category="outreach">
+                <h3 class="category-title">
+                    <div class="category-icon">
+                        <i data-lucide="send" class="w-4 h-4 text-indigo-400"></i>
+                    </div>
+                    首封触达
+                </h3>
+                <div class="grid grid-cols-1 gap-4">
+                    <!-- 模板1: 标准首封 -->
+                    <div class="template-card" data-keywords="首封 触达 标准 first outreach" data-template="template1">
+                        <div class="template-header">
+                            <div class="flex items-center gap-3">
+                                <span class="template-number">1</span>
+                                <span class="template-title">首封触达（标准版）</span>
+                            </div>
+                            <span class="template-badge recommended">推荐</span>
+                        </div>
+                        <div class="template-meta">
+                            <span class="meta-tag">📧 邮件</span>
+                            <span class="meta-tag">🎮 游戏合作</span>
+                            <span class="meta-tag">💰 含报价</span>
+                        </div>
+                        <div class="subject-line">
+                            <div class="subject-label">Subject 备选（选1）</div>
+                            <div class="subject-content">
+                                1. Collaboration opportunity with <span class="var-highlight">{GAME_NAME}</span> (YouTube integration)<br>
+                                2. Paid YouTube sponsorship for your next video?<br>
+                                3. Brand partnership: <span class="var-highlight">{GAME_NAME}</span> + <span class="var-highlight">{CREATOR_NAME}</span>
+                            </div>
+                        </div>
+                        <div class="email-content-wrapper">
+                            <div class="email-content" id="template1">Hi <span class="var-highlight">{CREATOR_NAME}</span>,
 
-I've been watching your recent videos—especially {VIDEO_REFERENCE_1} (great pacing and audience engagement). Based on your typical performance, we think your channel could be a strong fit for a brand-awareness campaign.
+I'm <span class="var-highlight">{YOUR_NAME}</span> from <span class="var-highlight">{COMPANY/BRAND}</span>. We're working on <span class="var-highlight">{GAME_NAME}</span> (<span class="var-highlight">{GENRE}</span>, <span class="var-highlight">{PLATFORM}</span>) and would love to explore a paid YouTube integration with you.
+
+I've been watching your recent videos—especially <span class="var-highlight">{VIDEO_REFERENCE_1}</span> (great pacing and audience engagement). Based on your typical performance, we think your channel could be a strong fit for a brand-awareness campaign.
 
 Proposed deliverable (flexible):
 - 1x YouTube long-form video integration (mid-roll or intro, your choice)
 - Link in description + pinned comment
 
-Budget: ${ANCHOR_PRICE} (open to your rate card / media kit)
+Budget: $<span class="var-highlight">{ANCHOR_PRICE}</span> (open to your rate card / media kit)
 
 If you're interested, could you share your sponsorship email and your current rates for a 60–90s integration? Happy to jump on a quick 15-min call as well.
 
 Best regards,
-{YOUR_NAME}
-{TITLE}
-{COMPANY/BRAND}
+<span class="var-highlight">{YOUR_NAME}</span>
+<span class="var-highlight">{TITLE}</span>
+<span class="var-highlight">{COMPANY/BRAND}</span>
 cooperate@topuplive.com</div>
-        <div class="template-actions">
-            <button class="btn-copy" onclick="copyTemplate('template1', this)">📋 复制邮件内容</button>
-            <button class="btn-copy" onclick="copySubject(this)">📋 复制Subject</button>
-        </div>
-        <div class="variable-list">
-            <h4>📝 需要替换的变量</h4>
-            <ul>
-                <li>{CREATOR_NAME} - 创作者称呼</li>
-                <li>{YOUR_NAME} - 你的姓名</li>
-                <li>{COMPANY/BRAND} - 公司/品牌名</li>
-                <li>{GAME_NAME} - 游戏名称</li>
-                <li>{GENRE} - 游戏类型（ARPG/MMO/SLG等）</li>
-                <li>{PLATFORM} - 平台（iOS/Android/PC）</li>
-                <li>{VIDEO_REFERENCE_1} - 引用的近期视频</li>
-                <li>{ANCHOR_PRICE} - 报价锚点</li>
-                <li>{TITLE} - 你的职位</li>
-            </ul>
-        </div>
-    </div>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn-preview" onclick="previewTemplate('template1')">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                预览
+                            </button>
+                            <button class="btn-copy" onclick="copyTemplate('template1', this)">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                复制邮件
+                            </button>
+                            <button class="btn-copy" onclick="copySubject(this)">
+                                <i data-lucide="type" class="w-4 h-4"></i>
+                                复制Subject
+                            </button>
+                        </div>
+                    </div>
 
-    <!-- 模板2: 简短首封 -->
-    <div class="template-card" data-keywords="首封 简短 商务短信 short">
-        <div class="template-header">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span class="template-number">2</span>
-                <span class="template-title">首封触达（简短商务风格）</span>
-            </div>
-            <span class="badge badge-green">高打开率</span>
-        </div>
-        <div class="template-meta">
-            <span class="meta-tag">📧 邮件</span>
-            <span class="meta-tag">⚡ 简短</span>
-            <span class="meta-tag">📱 移动端友好</span>
-        </div>
-        <div class="subject-line">
-            <div class="subject-label">Subject</div>
-            <div>Quick question: paid YouTube sponsorship?</div>
-        </div>
-        <div class="email-content" id="template2">Hi {CREATOR_NAME} — I'm {YOUR_NAME} from {BRAND}. We'd like to book a paid YouTube integration for {GAME_NAME}. Are you open to sponsorships this month?
+                    <!-- 模板2: 简短首封 -->
+                    <div class="template-card" data-keywords="首封 简短 商务短信 short" data-template="template2">
+                        <div class="template-header">
+                            <div class="flex items-center gap-3">
+                                <span class="template-number">2</span>
+                                <span class="template-title">首封触达（简短商务风格）</span>
+                            </div>
+                            <span class="template-badge high-open">高打开率</span>
+                        </div>
+                        <div class="template-meta">
+                            <span class="meta-tag">📧 邮件</span>
+                            <span class="meta-tag">⚡ 简短</span>
+                            <span class="meta-tag">📱 移动端友好</span>
+                        </div>
+                        <div class="subject-line">
+                            <div class="subject-label">Subject</div>
+                            <div class="subject-content">Quick question: paid YouTube sponsorship?</div>
+                        </div>
+                        <div class="email-content-wrapper">
+                            <div class="email-content" id="template2">Hi <span class="var-highlight">{CREATOR_NAME}</span> — I'm <span class="var-highlight">{YOUR_NAME}</span> from <span class="var-highlight">{BRAND}</span>. We'd like to book a paid YouTube integration for <span class="var-highlight">{GAME_NAME}</span>. Are you open to sponsorships this month?
 
 If yes, could you share your rate card for a 60–90s integration + description link + pinned comment?
 
 Thanks,
-{YOUR_NAME}
+<span class="var-highlight">{YOUR_NAME}</span>
 cooperate@topuplive.com</div>
-        <div class="template-actions">
-            <button class="btn-copy" onclick="copyTemplate('template2', this)">📋 复制邮件内容</button>
-        </div>
-    </div>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn-preview" onclick="previewTemplate('template2')">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                预览
+                            </button>
+                            <button class="btn-copy" onclick="copyTemplate('template2', this)">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                复制邮件
+                            </button>
+                        </div>
+                    </div>
 
-    <!-- 模板3: 找不到邮箱时 -->
-    <div class="template-card" data-keywords="找不到 邮箱 官网 表单 留言">
-        <div class="template-header">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span class="template-number">3</span>
-                <span class="template-title">找不到邮箱时：官网/表单/经纪公司留言</span>
-            </div>
-        </div>
-        <div class="template-meta">
-            <span class="meta-tag">📝 表单留言</span>
-            <span class="meta-tag">🏢 经纪公司</span>
-        </div>
-        <div class="email-content" id="template3">Hi {CREATOR_NAME}/{MANAGER_NAME},
+                    <!-- 模板3: 找不到邮箱时 -->
+                    <div class="template-card" data-keywords="找不到 邮箱 官网 表单 留言" data-template="template3">
+                        <div class="template-header">
+                            <div class="flex items-center gap-3">
+                                <span class="template-number">3</span>
+                                <span class="template-title">找不到邮箱时：官网/表单/经纪公司留言</span>
+                            </div>
+                        </div>
+                        <div class="template-meta">
+                            <span class="meta-tag">📝 表单留言</span>
+                            <span class="meta-tag">🏢 经纪公司</span>
+                        </div>
+                        <div class="email-content-wrapper">
+                            <div class="email-content" id="template3">Hi <span class="var-highlight">{CREATOR_NAME}</span>/<span class="var-highlight">{MANAGER_NAME}</span>,
 
-I'm reaching out from {BRAND}. We'd love to discuss a paid YouTube integration for our game {GAME_NAME}.
+I'm reaching out from <span class="var-highlight">{BRAND}</span>. We'd love to discuss a paid YouTube integration for our game <span class="var-highlight">{GAME_NAME}</span>.
 
 Could you please let me know the best email for sponsorship inquiries (or feel free to reply here)?
 
 Thank you,
-{YOUR_NAME}
+<span class="var-highlight">{YOUR_NAME}</span>
 cooperate@topuplive.com</div>
-        <div class="template-actions">
-            <button class="btn-copy" onclick="copyTemplate('template3', this)">📋 复制内容</button>
-        </div>
-    </div>
-</div>
-
-<!-- 跟进邮件 -->
-<div class="category-section" id="followup" data-category="followup">
-    <h3 class="category-title">🔄 跟进邮件</h3>
-
-    <!-- 模板4: 温和跟进1 -->
-    <div class="template-card follow-up" data-keywords="跟进 48小时 温和 followup">
-        <div class="template-header">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span class="template-number">4</span>
-                <span class="template-title">48小时未回复：温和跟进 #1</span>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn-preview" onclick="previewTemplate('template3')">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                预览
+                            </button>
+                            <button class="btn-copy" onclick="copyTemplate('template3', this)">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                复制内容
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <span class="badge badge-yellow">3天后</span>
-        </div>
-        <div class="template-meta">
-            <span class="meta-tag">🔄 跟进</span>
-            <span class="meta-tag">⏰ 48小时后</span>
-        </div>
-        <div class="subject-line">
-            <div class="subject-label">Subject</div>
-            <div>Re: Collaboration opportunity with {GAME_NAME}</div>
-        </div>
-        <div class="email-content" id="template4">Hi {CREATOR_NAME},
 
-Just following up in case my last email got buried. We'd still love to explore a paid YouTube integration for {GAME_NAME}.
+            <!-- 跟进邮件 -->
+            <div class="category-section" id="followup" data-category="followup">
+                <h3 class="category-title">
+                    <div class="category-icon">
+                        <i data-lucide="refresh-cw" class="w-4 h-4 text-amber-400"></i>
+                    </div>
+                    跟进邮件
+                </h3>
+                <div class="grid grid-cols-1 gap-4">
+                    <!-- 模板4: 温和跟进1 -->
+                    <div class="template-card" data-keywords="跟进 48小时 温和 followup" data-template="template4">
+                        <div class="template-header">
+                            <div class="flex items-center gap-3">
+                                <span class="template-number">4</span>
+                                <span class="template-title">48小时未回复：温和跟进 #1</span>
+                            </div>
+                            <span class="template-badge follow-up">3天后</span>
+                        </div>
+                        <div class="template-meta">
+                            <span class="meta-tag">🔄 跟进</span>
+                            <span class="meta-tag">⏰ 48小时后</span>
+                        </div>
+                        <div class="subject-line">
+                            <div class="subject-label">Subject</div>
+                            <div class="subject-content">Re: Collaboration opportunity with <span class="var-highlight">{GAME_NAME}</span></div>
+                        </div>
+                        <div class="email-content-wrapper">
+                            <div class="email-content" id="template4">Hi <span class="var-highlight">{CREATOR_NAME}</span>,
+
+Just following up in case my last email got buried. We'd still love to explore a paid YouTube integration for <span class="var-highlight">{GAME_NAME}</span>.
 
 If it helps, here's the quick ask:
 - 1x long-form integration (60–90s)
@@ -256,66 +794,90 @@ If it helps, here's the quick ask:
 Could you share your rate card / media kit, or point me to the right contact?
 
 Best,
-{YOUR_NAME}
+<span class="var-highlight">{YOUR_NAME}</span>
 cooperate@topuplive.com</div>
-        <div class="template-actions">
-            <button class="btn-copy" onclick="copyTemplate('template4', this)">📋 复制邮件内容</button>
-        </div>
-    </div>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn-preview" onclick="previewTemplate('template4')">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                预览
+                            </button>
+                            <button class="btn-copy" onclick="copyTemplate('template4', this)">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                复制邮件
+                            </button>
+                        </div>
+                    </div>
 
-    <!-- 模板5: 跟进2 -->
-    <div class="template-card follow-up" data-keywords="跟进 最后确认 时间窗口">
-        <div class="template-header">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span class="template-number">5</span>
-                <span class="template-title">48小时未回复：跟进 #2（给时间窗口）</span>
-            </div>
-            <span class="badge badge-yellow">7天后</span>
-        </div>
-        <div class="template-meta">
-            <span class="meta-tag">🔄 跟进</span>
-            <span class="meta-tag">⏰ 最后确认</span>
-        </div>
-        <div class="subject-line">
-            <div class="subject-label">Subject</div>
-            <div>Last check-in: {GAME_NAME} sponsorship</div>
-        </div>
-        <div class="email-content" id="template5">Hi {CREATOR_NAME},
+                    <!-- 模板5: 跟进2 -->
+                    <div class="template-card" data-keywords="跟进 最后确认 时间窗口" data-template="template5">
+                        <div class="template-header">
+                            <div class="flex items-center gap-3">
+                                <span class="template-number">5</span>
+                                <span class="template-title">48小时未回复：跟进 #2（给时间窗口）</span>
+                            </div>
+                            <span class="template-badge follow-up">7天后</span>
+                        </div>
+                        <div class="template-meta">
+                            <span class="meta-tag">🔄 跟进</span>
+                            <span class="meta-tag">⏰ 最后确认</span>
+                        </div>
+                        <div class="subject-line">
+                            <div class="subject-label">Subject</div>
+                            <div class="subject-content">Last check-in: <span class="var-highlight">{GAME_NAME}</span> sponsorship</div>
+                        </div>
+                        <div class="email-content-wrapper">
+                            <div class="email-content" id="template5">Hi <span class="var-highlight">{CREATOR_NAME}</span>,
 
-Last quick check-in from my side. We're finalizing creators for this campaign by {DEADLINE_DATE}. If you're open to a paid integration, could you send your rates/media kit before then?
+Last quick check-in from my side. We're finalizing creators for this campaign by <span class="var-highlight">{DEADLINE_DATE}</span>. If you're open to a paid integration, could you send your rates/media kit before then?
 
 If now isn't a fit, no worries at all—happy to reconnect later.
 
 Best regards,
-{YOUR_NAME}
+<span class="var-highlight">{YOUR_NAME}</span>
 cooperate@topuplive.com</div>
-        <div class="template-actions">
-            <button class="btn-copy" onclick="copyTemplate('template5', this)">📋 复制邮件内容</button>
-        </div>
-    </div>
-</div>
-
-<!-- 谈判回复 -->
-<div class="category-section" id="negotiation" data-category="negotiation">
-    <h3 class="category-title">💬 谈判回复</h3>
-
-    <!-- 模板6: 对方要报价 -->
-    <div class="template-card negotiation" data-keywords="谈判 报价 价格 需求 details">
-        <div class="template-header">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span class="template-number">6</span>
-                <span class="template-title">对方回复：要你先报更明确的价格/需求</span>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn-preview" onclick="previewTemplate('template5')">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                预览
+                            </button>
+                            <button class="btn-copy" onclick="copyTemplate('template5', this)">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                复制邮件
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="template-meta">
-            <span class="meta-tag">💬 谈判</span>
-            <span class="meta-tag">💰 报价</span>
-        </div>
-        <div class="subject-line">
-            <div class="subject-label">Subject</div>
-            <div>Re: {GAME_NAME} YouTube integration details</div>
-        </div>
-        <div class="email-content" id="template6">Hi {CREATOR_NAME},
+
+            <!-- 谈判回复 -->
+            <div class="category-section" id="negotiation" data-category="negotiation">
+                <h3 class="category-title">
+                    <div class="category-icon">
+                        <i data-lucide="message-square" class="w-4 h-4 text-emerald-400"></i>
+                    </div>
+                    谈判回复
+                </h3>
+                <div class="grid grid-cols-1 gap-4">
+                    <!-- 模板6: 对方要报价 -->
+                    <div class="template-card" data-keywords="谈判 报价 价格 需求 details" data-template="template6">
+                        <div class="template-header">
+                            <div class="flex items-center gap-3">
+                                <span class="template-number">6</span>
+                                <span class="template-title">对方回复：要你先报更明确的价格/需求</span>
+                            </div>
+                        </div>
+                        <div class="template-meta">
+                            <span class="meta-tag">💬 谈判</span>
+                            <span class="meta-tag">💰 报价</span>
+                        </div>
+                        <div class="subject-line">
+                            <div class="subject-label">Subject</div>
+                            <div class="subject-content">Re: <span class="var-highlight">{GAME_NAME}</span> YouTube integration details</div>
+                        </div>
+                        <div class="email-content-wrapper">
+                            <div class="email-content" id="template6">Hi <span class="var-highlight">{CREATOR_NAME}</span>,
 
 Thanks for getting back to me!
 
@@ -323,78 +885,96 @@ Here's what we're looking for (flexible based on your creative style):
 - 1x long-form YouTube video integration
 - 60–90s mention (intro or mid-roll)
 - Link in description + pinned comment
-- Posting window: {POST_WINDOW}
+- Posting window: <span class="var-highlight">{POST_WINDOW}</span>
 
-Budget range: ${TARGET_PRICE_LOW}–${TARGET_PRICE_HIGH} (depending on exact placement/length and any add-ons)
+Budget range: $<span class="var-highlight">{TARGET_PRICE_LOW}</span>–$<span class="var-highlight">{TARGET_PRICE_HIGH}</span> (depending on exact placement/length and any add-ons)
 
 If you share your rate card, we can lock the scope and move quickly.
 
 Best,
-{YOUR_NAME}
+<span class="var-highlight">{YOUR_NAME}</span>
 cooperate@topuplive.com</div>
-        <div class="template-actions">
-            <button class="btn-copy" onclick="copyTemplate('template6', this)">📋 复制邮件内容</button>
-        </div>
-    </div>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn-preview" onclick="previewTemplate('template6')">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                预览
+                            </button>
+                            <button class="btn-copy" onclick="copyTemplate('template6', this)">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                复制邮件
+                            </button>
+                        </div>
+                    </div>
 
-    <!-- 模板7: 对方压价 -->
-    <div class="template-card negotiation" data-keywords="谈判 压价 方案 降价 options">
-        <div class="template-header">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span class="template-number">7</span>
-                <span class="template-title">对方压价：给"两档方案"</span>
-            </div>
-            <span class="badge badge-blue">常用</span>
-        </div>
-        <div class="template-meta">
-            <span class="meta-tag">💬 谈判</span>
-            <span class="meta-tag">💰 压价应对</span>
-        </div>
-        <div class="subject-line">
-            <div class="subject-label">Subject</div>
-            <div>Re: {GAME_NAME} partnership — options</div>
-        </div>
-        <div class="email-content" id="template7">Hi {CREATOR_NAME},
+                    <!-- 模板7: 对方压价 -->
+                    <div class="template-card" data-keywords="谈判 压价 方案 降价 options" data-template="template7">
+                        <div class="template-header">
+                            <div class="flex items-center gap-3">
+                                <span class="template-number">7</span>
+                                <span class="template-title">对方压价：给"两档方案"</span>
+                            </div>
+                            <span class="template-badge popular">常用</span>
+                        </div>
+                        <div class="template-meta">
+                            <span class="meta-tag">💬 谈判</span>
+                            <span class="meta-tag">💰 压价应对</span>
+                        </div>
+                        <div class="subject-line">
+                            <div class="subject-label">Subject</div>
+                            <div class="subject-content">Re: <span class="var-highlight">{GAME_NAME}</span> partnership — options</div>
+                        </div>
+                        <div class="email-content-wrapper">
+                            <div class="email-content" id="template7">Hi <span class="var-highlight">{CREATOR_NAME}</span>,
 
 Totally understand the budget constraints. To make this work, here are two options:
 
-Option A (Adjusted fee): ${LOWER_FEE}
+Option A (Adjusted fee): $<span class="var-highlight">{LOWER_FEE}</span>
 - 45–60s integration
 - Description link only (no pinned comment)
 - 1 round of revisions
 
-Option B (Keep scope): ${TARGET_PRICE}
+Option B (Keep scope): $<span class="var-highlight">{TARGET_PRICE}</span>
 - 60–90s integration
 - Description link + pinned comment
-- {ADD_ON_1} included (e.g., Community post or Shorts teaser)
+- <span class="var-highlight">{ADD_ON_1}</span> included (e.g., Community post or Shorts teaser)
 
 Let me know which option you prefer, or share your rate card and we'll align on the best package.
 
 Best,
-{YOUR_NAME}
+<span class="var-highlight">{YOUR_NAME}</span>
 cooperate@topuplive.com</div>
-        <div class="template-actions">
-            <button class="btn-copy" onclick="copyTemplate('template7', this)">📋 复制邮件内容</button>
-        </div>
-    </div>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn-preview" onclick="previewTemplate('template7')">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                预览
+                            </button>
+                            <button class="btn-copy" onclick="copyTemplate('template7', this)">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                复制邮件
+                            </button>
+                        </div>
+                    </div>
 
-    <!-- 模板8: 要求保证播放量 -->
-    <div class="template-card negotiation" data-keywords="谈判 保证 播放量 转化 performance">
-        <div class="template-header">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span class="template-number">8</span>
-                <span class="template-title">对方要求"保证播放量/转化"：合规拒绝</span>
-            </div>
-        </div>
-        <div class="template-meta">
-            <span class="meta-tag">💬 谈判</span>
-            <span class="meta-tag">⚠️ 合规拒绝</span>
-        </div>
-        <div class="subject-line">
-            <div class="subject-label">Subject</div>
-            <div>Re: Performance expectations for {GAME_NAME}</div>
-        </div>
-        <div class="email-content" id="template8">Hi {CREATOR_NAME},
+                    <!-- 模板8: 要求保证播放量 -->
+                    <div class="template-card" data-keywords="谈判 保证 播放量 转化 performance" data-template="template8">
+                        <div class="template-header">
+                            <div class="flex items-center gap-3">
+                                <span class="template-number">8</span>
+                                <span class="template-title">对方要求"保证播放量/转化"：合规拒绝</span>
+                            </div>
+                        </div>
+                        <div class="template-meta">
+                            <span class="meta-tag">💬 谈判</span>
+                            <span class="meta-tag">⚠️ 合规拒绝</span>
+                        </div>
+                        <div class="subject-line">
+                            <div class="subject-label">Subject</div>
+                            <div class="subject-content">Re: Performance expectations for <span class="var-highlight">{GAME_NAME}</span></div>
+                        </div>
+                        <div class="email-content-wrapper">
+                            <div class="email-content" id="template8">Hi <span class="var-highlight">{CREATOR_NAME}</span>,
 
 Thanks for the note. For clarity, we can't include guaranteed views/conversions in the agreement since performance depends on many factors outside anyone's direct control.
 
@@ -403,45 +983,60 @@ What we *can* do is define clear deliverables and quality standards:
 - Link placement (description + pinned comment)
 - Posting window
 
-If you'd like, we can also add a performance bonus (e.g., extra payment if the video exceeds {VIEWS_THRESHOLD} views within {DAYS} days).
+If you'd like, we can also add a performance bonus (e.g., extra payment if the video exceeds <span class="var-highlight">{VIEWS_THRESHOLD}</span> views within <span class="var-highlight">{DAYS}</span> days).
 
 Best regards,
-{YOUR_NAME}
+<span class="var-highlight">{YOUR_NAME}</span>
 cooperate@topuplive.com</div>
-        <div class="template-actions">
-            <button class="btn-copy" onclick="copyTemplate('template8', this)">📋 复制邮件内容</button>
-        </div>
-    </div>
-</div>
-
-<!-- Brief/排期 -->
-<div class="category-section" id="brief" data-category="brief">
-    <h3 class="category-title">📋 Brief & 排期</h3>
-
-    <!-- 模板9: 发送Brief -->
-    <div class="template-card" data-keywords="brief 素材包 assets">
-        <div class="template-header">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span class="template-number">9</span>
-                <span class="template-title">发送 Brief/素材包</span>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn-preview" onclick="previewTemplate('template8')">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                预览
+                            </button>
+                            <button class="btn-copy" onclick="copyTemplate('template8', this)">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                复制邮件
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="template-meta">
-            <span class="meta-tag">📦 素材对接</span>
-            <span class="meta-tag">📋 Brief</span>
-        </div>
-        <div class="subject-line">
-            <div class="subject-label">Subject</div>
-            <div>{GAME_NAME} — Brief & assets for your review</div>
-        </div>
-        <div class="email-content" id="template9">Hi {CREATOR_NAME},
+
+            <!-- Brief/排期 -->
+            <div class="category-section" id="brief" data-category="brief">
+                <h3 class="category-title">
+                    <div class="category-icon">
+                        <i data-lucide="file-text" class="w-4 h-4 text-rose-400"></i>
+                    </div>
+                    Brief & 排期
+                </h3>
+                <div class="grid grid-cols-1 gap-4">
+                    <!-- 模板9: 发送Brief -->
+                    <div class="template-card" data-keywords="brief 素材包 assets" data-template="template9">
+                        <div class="template-header">
+                            <div class="flex items-center gap-3">
+                                <span class="template-number">9</span>
+                                <span class="template-title">发送 Brief/素材包</span>
+                            </div>
+                        </div>
+                        <div class="template-meta">
+                            <span class="meta-tag">📦 素材对接</span>
+                            <span class="meta-tag">📋 Brief</span>
+                        </div>
+                        <div class="subject-line">
+                            <div class="subject-label">Subject</div>
+                            <div class="subject-content"><span class="var-highlight">{GAME_NAME}</span> — Brief & assets for your review</div>
+                        </div>
+                        <div class="email-content-wrapper">
+                            <div class="email-content" id="template9">Hi <span class="var-highlight">{CREATOR_NAME}</span>,
 
 Great — sharing the campaign brief and assets below:
 
-- Brief (Google Doc/PDF): {BRIEF_LINK}
-- Asset pack (drive link): {ASSET_PACK_LINK}
-- Tracking link (for description): {TRACKING_LINK}
-- Key points (TL;DR): {KEY_POINTS_1_LINE}
+- Brief (Google Doc/PDF): <span class="var-highlight">{BRIEF_LINK}</span>
+- Asset pack (drive link): <span class="var-highlight">{ASSET_PACK_LINK}</span>
+- Tracking link (for description): <span class="var-highlight">{TRACKING_LINK}</span>
+- Key points (TL;DR): <span class="var-highlight">{KEY_POINTS_1_LINE}</span>
 
 Could you please confirm:
 1) Your planned posting date/time
@@ -450,167 +1045,344 @@ Could you please confirm:
 Once confirmed, we'll proceed with the agreement and timeline.
 
 Best,
-{YOUR_NAME}
+<span class="var-highlight">{YOUR_NAME}</span>
 cooperate@topuplive.com</div>
-        <div class="template-actions">
-            <button class="btn-copy" onclick="copyTemplate('template9', this)">📋 复制邮件内容</button>
-        </div>
-    </div>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn-preview" onclick="previewTemplate('template9')">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                预览
+                            </button>
+                            <button class="btn-copy" onclick="copyTemplate('template9', this)">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                复制邮件
+                            </button>
+                        </div>
+                    </div>
 
-    <!-- 模板10: 确认排期 -->
-    <div class="template-card" data-keywords="排期 确认 schedule 上线时间">
-        <div class="template-header">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span class="template-number">10</span>
-                <span class="template-title">确认排期（锁定上线时间）</span>
-            </div>
-        </div>
-        <div class="template-meta">
-            <span class="meta-tag">📅 排期</span>
-            <span class="meta-tag">✅ 确认</span>
-        </div>
-        <div class="subject-line">
-            <div class="subject-label">Subject</div>
-            <div>Confirming schedule — {GAME_NAME} integration</div>
-        </div>
-        <div class="email-content" id="template10">Hi {CREATOR_NAME},
+                    <!-- 模板10: 确认排期 -->
+                    <div class="template-card" data-keywords="排期 确认 schedule 上线时间" data-template="template10">
+                        <div class="template-header">
+                            <div class="flex items-center gap-3">
+                                <span class="template-number">10</span>
+                                <span class="template-title">确认排期（锁定上线时间）</span>
+                            </div>
+                        </div>
+                        <div class="template-meta">
+                            <span class="meta-tag">📅 排期</span>
+                            <span class="meta-tag">✅ 确认</span>
+                        </div>
+                        <div class="subject-line">
+                            <div class="subject-label">Subject</div>
+                            <div class="subject-content">Confirming schedule — <span class="var-highlight">{GAME_NAME}</span> integration</div>
+                        </div>
+                        <div class="email-content-wrapper">
+                            <div class="email-content" id="template10">Hi <span class="var-highlight">{CREATOR_NAME}</span>,
 
 Perfect — confirming the schedule:
-- Planned posting date/time: {POST_DATETIME} ({TIMEZONE})
-- Integration placement: {PLACEMENT}
-- Deliverables: {DELIVERABLES_SHORT}
+- Planned posting date/time: <span class="var-highlight">{POST_DATETIME}</span> (<span class="var-highlight">{TIMEZONE}</span>)
+- Integration placement: <span class="var-highlight">{PLACEMENT}</span>
+- Deliverables: <span class="var-highlight">{DELIVERABLES_SHORT}</span>
 
-Please share a private preview link (if applicable) by {PREVIEW_DEADLINE}, and we'll provide consolidated feedback within {FEEDBACK_TURNAROUND_HOURS} hours.
+Please share a private preview link (if applicable) by <span class="var-highlight">{PREVIEW_DEADLINE}</span>, and we'll provide consolidated feedback within <span class="var-highlight">{FEEDBACK_TURNAROUND_HOURS}</span> hours.
 
 Thanks!
-{YOUR_NAME}
+<span class="var-highlight">{YOUR_NAME}</span>
 cooperate@topuplive.com</div>
-        <div class="template-actions">
-            <button class="btn-copy" onclick="copyTemplate('template10', this)">📋 复制邮件内容</button>
-        </div>
-    </div>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn-preview" onclick="previewTemplate('template10')">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                预览
+                            </button>
+                            <button class="btn-copy" onclick="copyTemplate('template10', this)">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                复制邮件
+                            </button>
+                        </div>
+                    </div>
 
-    <!-- 模板11: 上线验收 -->
-    <div class="template-card" data-keywords="上线 验收 链接 tracking">
-        <div class="template-header">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span class="template-number">11</span>
-                <span class="template-title">上线验收（要链接 + 轻量复盘）</span>
-            </div>
-        </div>
-        <div class="template-meta">
-            <span class="meta-tag">🎬 上线</span>
-            <span class="meta-tag">📊 数据</span>
-        </div>
-        <div class="subject-line">
-            <div class="subject-label">Subject</div>
-            <div>{GAME_NAME} is live? Link for tracking</div>
-        </div>
-        <div class="email-content" id="template11">Hi {CREATOR_NAME},
+                    <!-- 模板11: 上线验收 -->
+                    <div class="template-card" data-keywords="上线 验收 链接 tracking" data-template="template11">
+                        <div class="template-header">
+                            <div class="flex items-center gap-3">
+                                <span class="template-number">11</span>
+                                <span class="template-title">上线验收（要链接 + 轻量复盘）</span>
+                            </div>
+                        </div>
+                        <div class="template-meta">
+                            <span class="meta-tag">🎬 上线</span>
+                            <span class="meta-tag">📊 数据</span>
+                        </div>
+                        <div class="subject-line">
+                            <div class="subject-label">Subject</div>
+                            <div class="subject-content"><span class="var-highlight">{GAME_NAME}</span> is live? Link for tracking</div>
+                        </div>
+                        <div class="email-content-wrapper">
+                            <div class="email-content" id="template11">Hi <span class="var-highlight">{CREATOR_NAME}</span>,
 
 Hope you're doing well. Has the video gone live? If yes, could you share the live URL so we can start tracking?
 
 Also, if you have early stats (first 24h views / audience retention highlights), feel free to share—totally optional.
 
 Thanks again,
-{YOUR_NAME}
+<span class="var-highlight">{YOUR_NAME}</span>
 cooperate@topuplive.com</div>
-        <div class="template-actions">
-            <button class="btn-copy" onclick="copyTemplate('template11', this)">📋 复制邮件内容</button>
-        </div>
-    </div>
-</div>
-
-<!-- 结束 -->
-<div class="category-section" id="closure" data-category="closure">
-    <h3 class="category-title">❌ 结束/留存</h3>
-
-    <!-- 模板12: 礼貌拒绝 -->
-    <div class="template-card closure" data-keywords="拒绝 留存 没档期 not interested">
-        <div class="template-header">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span class="template-number">12</span>
-                <span class="template-title">礼貌拒绝/留存（对方不接/没档期）</span>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn-preview" onclick="previewTemplate('template11')">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                预览
+                            </button>
+                            <button class="btn-copy" onclick="copyTemplate('template11', this)">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                复制邮件
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="template-meta">
-            <span class="meta-tag">❌ 结束</span>
-            <span class="meta-tag">🤝 留存</span>
-        </div>
-        <div class="subject-line">
-            <div class="subject-label">Subject</div>
-            <div>Re: {GAME_NAME} partnership</div>
-        </div>
-        <div class="email-content" id="template12">Hi {CREATOR_NAME},
+
+            <!-- 结束 -->
+            <div class="category-section" id="closure" data-category="closure">
+                <h3 class="category-title">
+                    <div class="category-icon">
+                        <i data-lucide="x-circle" class="w-4 h-4 text-zinc-400"></i>
+                    </div>
+                    结束/留存
+                </h3>
+                <div class="grid grid-cols-1 gap-4">
+                    <!-- 模板12: 礼貌拒绝 -->
+                    <div class="template-card" data-keywords="拒绝 留存 没档期 not interested" data-template="template12">
+                        <div class="template-header">
+                            <div class="flex items-center gap-3">
+                                <span class="template-number">12</span>
+                                <span class="template-title">礼貌拒绝/留存（对方不接/没档期）</span>
+                            </div>
+                        </div>
+                        <div class="template-meta">
+                            <span class="meta-tag">❌ 结束</span>
+                            <span class="meta-tag">🤝 留存</span>
+                        </div>
+                        <div class="subject-line">
+                            <div class="subject-label">Subject</div>
+                            <div class="subject-content">Re: <span class="var-highlight">{GAME_NAME}</span> partnership</div>
+                        </div>
+                        <div class="email-content-wrapper">
+                            <div class="email-content" id="template12">Hi <span class="var-highlight">{CREATOR_NAME}</span>,
 
 Thanks for letting me know. No worries at all.
 
 If it's okay, I'll keep your contact for future campaigns that may fit your schedule better. Feel free to reach out anytime if your availability changes.
 
 Best,
-{YOUR_NAME}
+<span class="var-highlight">{YOUR_NAME}</span>
 cooperate@topuplive.com</div>
-        <div class="template-actions">
-            <button class="btn-copy" onclick="copyTemplate('template12', this)">📋 复制邮件内容</button>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn-preview" onclick="previewTemplate('template12')">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                预览
+                            </button>
+                            <button class="btn-copy" onclick="copyTemplate('template12', this)">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                复制邮件
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Variable Sidebar -->
+    <div class="variable-sidebar w-80 flex-shrink-0">
+        <div class="variable-panel sticky top-24">
+            <div class="variable-panel-header">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+                        <i data-lucide="settings-2" class="w-5 h-5 text-indigo-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-zinc-50">变量设置</h3>
+                        <p class="text-xs text-zinc-500">填写后自动替换模板变量</p>
+                    </div>
+                </div>
+            </div>
+            <div class="variable-form">
+                <!-- 基础信息 -->
+                <div class="mb-4">
+                    <h4 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">基础信息</h4>
+                    <div class="form-group">
+                        <label class="form-label"><code>{CREATOR_NAME}</code></label>
+                        <input type="text" class="form-input var-input" data-var="CREATOR_NAME" placeholder="创作者称呼">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{YOUR_NAME}</code></label>
+                        <input type="text" class="form-input var-input" data-var="YOUR_NAME" placeholder="你的姓名">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{TITLE}</code></label>
+                        <input type="text" class="form-input var-input" data-var="TITLE" placeholder="你的职位">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{COMPANY/BRAND}</code> / <code>{BRAND}</code></label>
+                        <input type="text" class="form-input var-input" data-var="COMPANY/BRAND" placeholder="公司/品牌名">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{MANAGER_NAME}</code></label>
+                        <input type="text" class="form-input var-input" data-var="MANAGER_NAME" placeholder="经纪人姓名">
+                    </div>
+                </div>
+
+                <!-- 游戏信息 -->
+                <div class="mb-4">
+                    <h4 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">游戏信息</h4>
+                    <div class="form-group">
+                        <label class="form-label"><code>{GAME_NAME}</code></label>
+                        <input type="text" class="form-input var-input" data-var="GAME_NAME" placeholder="游戏名称">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{GENRE}</code></label>
+                        <input type="text" class="form-input var-input" data-var="GENRE" placeholder="游戏类型 (ARPG/MMO/SLG)">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{PLATFORM}</code></label>
+                        <input type="text" class="form-input var-input" data-var="PLATFORM" placeholder="平台 (iOS/Android/PC)">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{VIDEO_REFERENCE_1}</code></label>
+                        <input type="text" class="form-input var-input" data-var="VIDEO_REFERENCE_1" placeholder="引用的近期视频">
+                    </div>
+                </div>
+
+                <!-- 报价相关 -->
+                <div class="mb-4">
+                    <h4 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">报价相关</h4>
+                    <div class="form-group">
+                        <label class="form-label"><code>{ANCHOR_PRICE}</code></label>
+                        <input type="text" class="form-input var-input" data-var="ANCHOR_PRICE" placeholder="报价锚点">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{TARGET_PRICE}</code></label>
+                        <input type="text" class="form-input var-input" data-var="TARGET_PRICE" placeholder="目标价">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{TARGET_PRICE_LOW}</code> - <code>{TARGET_PRICE_HIGH}</code></label>
+                        <div class="flex gap-2">
+                            <input type="text" class="form-input var-input flex-1" data-var="TARGET_PRICE_LOW" placeholder="最低价">
+                            <input type="text" class="form-input var-input flex-1" data-var="TARGET_PRICE_HIGH" placeholder="最高价">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{LOWER_FEE}</code></label>
+                        <input type="text" class="form-input var-input" data-var="LOWER_FEE" placeholder="降价后费用">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{ADD_ON_1}</code></label>
+                        <input type="text" class="form-input var-input" data-var="ADD_ON_1" placeholder="附加权益">
+                    </div>
+                </div>
+
+                <!-- 时间/排期 -->
+                <div class="mb-4">
+                    <h4 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">时间/排期</h4>
+                    <div class="form-group">
+                        <label class="form-label"><code>{POST_WINDOW}</code></label>
+                        <input type="text" class="form-input var-input" data-var="POST_WINDOW" placeholder="发布时间窗口">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{DEADLINE_DATE}</code></label>
+                        <input type="text" class="form-input var-input" data-var="DEADLINE_DATE" placeholder="选人截止日">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{POST_DATETIME}</code></label>
+                        <input type="text" class="form-input var-input" data-var="POST_DATETIME" placeholder="计划发布时间">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{TIMEZONE}</code></label>
+                        <input type="text" class="form-input var-input" data-var="TIMEZONE" placeholder="时区">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{PREVIEW_DEADLINE}</code></label>
+                        <input type="text" class="form-input var-input" data-var="PREVIEW_DEADLINE" placeholder="预览链接截止日">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{FEEDBACK_TURNAROUND_HOURS}</code></label>
+                        <input type="text" class="form-input var-input" data-var="FEEDBACK_TURNAROUND_HOURS" placeholder="反馈时限(小时)">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{DAYS}</code></label>
+                        <input type="text" class="form-input var-input" data-var="DAYS" placeholder="天数">
+                    </div>
+                </div>
+
+                <!-- 链接/素材 -->
+                <div class="mb-4">
+                    <h4 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">链接/素材</h4>
+                    <div class="form-group">
+                        <label class="form-label"><code>{BRIEF_LINK}</code></label>
+                        <input type="text" class="form-input var-input" data-var="BRIEF_LINK" placeholder="Brief链接">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{ASSET_PACK_LINK}</code></label>
+                        <input type="text" class="form-input var-input" data-var="ASSET_PACK_LINK" placeholder="素材包链接">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{TRACKING_LINK}</code></label>
+                        <input type="text" class="form-input var-input" data-var="TRACKING_LINK" placeholder="追踪链接">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{KEY_POINTS_1_LINE}</code></label>
+                        <input type="text" class="form-input var-input" data-var="KEY_POINTS_1_LINE" placeholder="关键要点">
+                    </div>
+                </div>
+
+                <!-- 其他 -->
+                <div class="mb-4">
+                    <h4 class="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">其他</h4>
+                    <div class="form-group">
+                        <label class="form-label"><code>{PLACEMENT}</code></label>
+                        <input type="text" class="form-input var-input" data-var="PLACEMENT" placeholder="植入位置">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{DELIVERABLES_SHORT}</code></label>
+                        <input type="text" class="form-input var-input" data-var="DELIVERABLES_SHORT" placeholder="交付物简述">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><code>{VIEWS_THRESHOLD}</code></label>
+                        <input type="text" class="form-input var-input" data-var="VIEWS_THRESHOLD" placeholder="播放量阈值">
+                    </div>
+                </div>
+
+                <button class="btn-primary w-full py-3 rounded-xl font-medium" onclick="clearAllVars()">
+                    <i data-lucide="trash-2" class="w-4 h-4 inline mr-2"></i>
+                    清空所有变量
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- 变量清单 -->
-<div class="card" style="margin-top: 2rem;">
-    <h3>📝 完整变量清单</h3>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
-        <div>
-            <h4 style="color: #667eea; margin-bottom: 0.5rem;">基础信息</h4>
-            <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
-                <li><code>{CREATOR_NAME}</code> - 创作者称呼</li>
-                <li><code>{channel_url}</code> - 频道链接</li>
-                <li><code>{VIDEO_REFERENCE_1}</code> - 引用视频</li>
-            </ul>
+<!-- Preview Modal -->
+<div class="preview-modal" id="previewModal" onclick="closePreview(event)">
+    <div class="preview-content" onclick="event.stopPropagation()">
+        <div class="preview-header">
+            <div class="flex items-center gap-3">
+                <i data-lucide="eye" class="w-5 h-5 text-indigo-400"></i>
+                <h3 class="font-semibold">邮件预览</h3>
+            </div>
+            <button class="btn-close" onclick="closePreview()">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
         </div>
-        <div>
-            <h4 style="color: #667eea; margin-bottom: 0.5rem;">游戏信息</h4>
-            <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
-                <li><code>{GAME_NAME}</code> - 游戏名</li>
-                <li><code>{GENRE}</code> - 类型（ARPG/MMO/SLG）</li>
-                <li><code>{PLATFORM}</code> - iOS/Android/PC</li>
-            </ul>
-        </div>
-        <div>
-            <h4 style="color: #667eea; margin-bottom: 0.5rem;">报价相关</h4>
-            <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
-                <li><code>{ANCHOR_PRICE}</code> - 锚点价</li>
-                <li><code>{TARGET_PRICE}</code> - 目标价</li>
-                <li><code>{TARGET_PRICE_LOW}</code> - 最低价</li>
-                <li><code>{TARGET_PRICE_HIGH}</code> - 最高价</li>
-                <li><code>{LOWER_FEE}</code> - 降价后费用</li>
-            </ul>
-        </div>
-        <div>
-            <h4 style="color: #667eea; margin-bottom: 0.5rem;">时间/排期</h4>
-            <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
-                <li><code>{POST_WINDOW}</code> - 发布时间窗口</li>
-                <li><code>{DEADLINE_DATE}</code> - 选人截止日</li>
-                <li><code>{POST_DATETIME}</code> - 计划发布时间</li>
-                <li><code>{TIMEZONE}</code> - 时区</li>
-            </ul>
-        </div>
-        <div>
-            <h4 style="color: #667eea; margin-bottom: 0.5rem;">链接/素材</h4>
-            <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
-                <li><code>{BRIEF_LINK}</code> - Brief链接</li>
-                <li><code>{ASSET_PACK_LINK}</code> - 素材包链接</li>
-                <li><code>{TRACKING_LINK}</code> - 追踪链接</li>
-            </ul>
-        </div>
-        <div>
-            <h4 style="color: #667eea; margin-bottom: 0.5rem;">其他</h4>
-            <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
-                <li><code>{YOUR_NAME}</code> - 你的姓名</li>
-                <li><code>{TITLE}</code> - 职位</li>
-                <li><code>{COMPANY/BRAND}</code> - 公司/品牌</li>
-                <li><code>{VIEWS_THRESHOLD}</code> - 播放量阈值</li>
-            </ul>
+        <div class="preview-body" id="previewBody"></div>
+        <div class="p-4 border-t border-zinc-800 flex justify-end gap-3">
+            <button class="btn-copy" onclick="closePreview()">关闭</button>
+            <button class="btn-primary px-4 py-2 rounded-lg" onclick="copyPreview()">
+                <i data-lucide="copy" class="w-4 h-4 inline mr-2"></i>
+                复制内容
+            </button>
         </div>
     </div>
 </div>
@@ -618,33 +1390,166 @@ cooperate@topuplive.com</div>
 
 {% block extra_js %}
 <script>
+    // 存储变量值
+    const varValues = {};
+    let currentPreviewContent = '';
+
+    // 初始化变量输入监听
+    document.querySelectorAll('.var-input').forEach(input => {
+        input.addEventListener('input', function() {
+            const varName = this.dataset.var;
+            varValues[varName] = this.value;
+            
+            // 同步 COMPANY/BRAND 和 BRAND
+            if (varName === 'COMPANY/BRAND') {
+                varValues['BRAND'] = this.value;
+            }
+            
+            updateTemplateDisplay();
+        });
+    });
+
+    // 更新模板显示
+    function updateTemplateDisplay() {
+        document.querySelectorAll('.email-content').forEach(content => {
+            let html = content.innerHTML;
+            
+            // 替换所有变量
+            Object.keys(varValues).forEach(varName => {
+                const value = varValues[varName];
+                if (value) {
+                    const regex = new RegExp(`<span class="var-highlight">{${varName}}</span>`, 'g');
+                    html = html.replace(regex, `<span class="var-replaced">${value}</span>`);
+                }
+            });
+            
+            // 恢复未替换的变量
+            html = html.replace(/<span class="var-replaced">({[^}]+})<\/span>/g, '<span class="var-highlight">$1</span>');
+            
+            content.innerHTML = html;
+        });
+    }
+
+    // 预览模板
+    function previewTemplate(templateId) {
+        const content = document.getElementById(templateId).innerText;
+        let processedContent = content;
+        
+        // 替换变量
+        Object.keys(varValues).forEach(varName => {
+            const value = varValues[varName];
+            if (value) {
+                const regex = new RegExp(`{${varName}}`, 'g');
+                processedContent = processedContent.replace(regex, value);
+            }
+        });
+        
+        currentPreviewContent = processedContent;
+        document.getElementById('previewBody').innerText = processedContent;
+        document.getElementById('previewModal').classList.add('active');
+        lucide.createIcons();
+    }
+
+    // 关闭预览
+    function closePreview(event) {
+        if (!event || event.target.id === 'previewModal') {
+            document.getElementById('previewModal').classList.remove('active');
+        }
+    }
+
+    // 复制预览内容
+    function copyPreview() {
+        navigator.clipboard.writeText(currentPreviewContent).then(() => {
+            const btn = document.querySelector('#previewModal .btn-primary');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="check" class="w-4 h-4 inline mr-2"></i>已复制!';
+            btn.classList.add('copied');
+            lucide.createIcons();
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('copied');
+                lucide.createIcons();
+            }, 2000);
+        });
+    }
+
     // 复制模板内容
     function copyTemplate(elementId, button) {
         const content = document.getElementById(elementId).innerText;
-        navigator.clipboard.writeText(content).then(() => {
-            const originalText = button.innerText;
-            button.innerText = '✅ 已复制!';
+        let processedContent = content;
+        
+        // 替换变量
+        Object.keys(varValues).forEach(varName => {
+            const value = varValues[varName];
+            if (value) {
+                const regex = new RegExp(`{${varName}}`, 'g');
+                processedContent = processedContent.replace(regex, value);
+            }
+        });
+        
+        navigator.clipboard.writeText(processedContent).then(() => {
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>已复制!';
             button.classList.add('copied');
+            lucide.createIcons();
             setTimeout(() => {
-                button.innerText = originalText;
+                button.innerHTML = originalText;
                 button.classList.remove('copied');
+                lucide.createIcons();
             }, 2000);
         });
     }
 
     // 复制Subject
     function copySubject(button) {
-        const subjectLine = button.closest('.template-card').querySelector('.subject-line');
-        const subjects = subjectLine.innerText.replace('SUBJECT 备选（选1）', '').replace('SUBJECT', '').trim();
+        const subjectLine = button.closest('.template-card').querySelector('.subject-content');
+        let subjects = subjectLine.innerText;
+        
+        // 替换变量
+        Object.keys(varValues).forEach(varName => {
+            const value = varValues[varName];
+            if (value) {
+                const regex = new RegExp(`{${varName}}`, 'g');
+                subjects = subjects.replace(regex, value);
+            }
+        });
+        
         navigator.clipboard.writeText(subjects).then(() => {
-            const originalText = button.innerText;
-            button.innerText = '✅ 已复制!';
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>已复制!';
             button.classList.add('copied');
+            lucide.createIcons();
             setTimeout(() => {
-                button.innerText = originalText;
+                button.innerHTML = originalText;
                 button.classList.remove('copied');
+                lucide.createIcons();
             }, 2000);
         });
+    }
+
+    // 清空所有变量
+    function clearAllVars() {
+        document.querySelectorAll('.var-input').forEach(input => {
+            input.value = '';
+        });
+        Object.keys(varValues).forEach(key => delete varValues[key]);
+        
+        // 恢复原始显示
+        document.querySelectorAll('.email-content').forEach(content => {
+            let html = content.innerHTML;
+            html = html.replace(/<span class="var-replaced">([^<]+)<\/span>/g, (match, value) => {
+                // 找到对应的变量名
+                for (const [varName, varValue] of Object.entries(varValues)) {
+                    if (varValue === value) {
+                        return `<span class="var-highlight">{${varName}}</span>`;
+                    }
+                }
+                return match;
+            });
+        });
+        
+        // 重新加载页面以恢复原始状态
+        location.reload();
     }
 
     // 搜索功能
@@ -668,7 +1573,6 @@ cooperate@topuplive.com</div>
     // 筛选功能
     document.querySelectorAll('.filter-tab').forEach(tab => {
         tab.addEventListener('click', function() {
-            // 更新活动状态
             document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
             this.classList.add('active');
 
@@ -684,5 +1588,8 @@ cooperate@topuplive.com</div>
             });
         });
     });
+
+    // 初始化图标
+    lucide.createIcons();
 </script>
 {% endblock %}
