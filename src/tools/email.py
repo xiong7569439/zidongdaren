@@ -61,10 +61,13 @@ class EmailTool:
         self.use_tls = use_tls
         self.use_ssl = use_ssl
         
-        # 阿里云企业邮箱使用SSL（端口465）
+        # 自动检测连接方式：465端口使用SSL，587端口使用STARTTLS
         if self.smtp_port == 465:
             self.use_ssl = True
             self.use_tls = False
+        elif self.smtp_port == 587:
+            self.use_ssl = False
+            self.use_tls = True
         
         # SendGrid配置
         self.sendgrid_api_key = sendgrid_api_key
