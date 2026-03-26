@@ -135,15 +135,15 @@ def load_config(config_path: str = "config.yaml") -> Config:
     if os.getenv('YOUTUBE_API_KEY'):
         config.youtube_api.api_key = os.getenv('YOUTUBE_API_KEY')
     
-    # Email SMTP
-    if os.getenv('SMTP_HOST'):
-        config.email.smtp.host = os.getenv('SMTP_HOST')
-    if os.getenv('SMTP_PORT'):
-        config.email.smtp.port = int(os.getenv('SMTP_PORT'))
-    if os.getenv('SMTP_USER'):
-        config.email.smtp.user = os.getenv('SMTP_USER')
-    if os.getenv('SMTP_PASSWORD'):
-        config.email.smtp.password = os.getenv('SMTP_PASSWORD')
+    # Email SMTP (支持两种变量名格式)
+    if os.getenv('EMAIL_SMTP_HOST') or os.getenv('SMTP_HOST'):
+        config.email.smtp.host = os.getenv('EMAIL_SMTP_HOST') or os.getenv('SMTP_HOST')
+    if os.getenv('EMAIL_SMTP_PORT') or os.getenv('SMTP_PORT'):
+        config.email.smtp.port = int(os.getenv('EMAIL_SMTP_PORT') or os.getenv('SMTP_PORT'))
+    if os.getenv('EMAIL_SENDER') or os.getenv('SMTP_USER'):
+        config.email.smtp.user = os.getenv('EMAIL_SENDER') or os.getenv('SMTP_USER')
+    if os.getenv('EMAIL_PASSWORD') or os.getenv('SMTP_PASSWORD'):
+        config.email.smtp.password = os.getenv('EMAIL_PASSWORD') or os.getenv('SMTP_PASSWORD')
     
     # SendGrid
     if os.getenv('SENDGRID_API_KEY'):
