@@ -2,6 +2,9 @@
 .env
 .env.backup
 
+# Qoder IDE
+.qoder/
+
 # Python
 __pycache__/
 *.py[cod]
