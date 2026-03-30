@@ -31,10 +31,59 @@
     <div>
         <p class="text-zinc-400 text-sm mt-1">管理你的 YouTube 网红合作线索</p>
     </div>
-    <a href="{{ url_for('new_lead') }}" class="btn-primary inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm">
-        <i data-lucide="plus" class="w-4 h-4"></i>
-        新建线索
-    </a>
+    <div class="flex items-center gap-3">
+        <button id="batchCollectBtn" onclick="startBatchCollect()" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all">
+            <i data-lucide="database" class="w-4 h-4"></i>
+            一键批量采集
+            <span id="uncollectedCount" class="hidden ml-1 px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-xs"></span>
+        </button>
+        <a href="{{ url_for('new_lead') }}" class="btn-primary inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            新建线索
+        </a>
+    </div>
+</div>
+
+<!-- Batch Collection Progress Modal -->
+<div id="batchCollectModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeBatchModal()"></div>
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
+        <div class="glass-strong rounded-2xl p-6 border border-zinc-700 shadow-2xl">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold flex items-center gap-2">
+                    <i data-lucide="database" class="w-5 h-5 text-emerald-400"></i>
+                    批量数据采集
+                </h3>
+                <button onclick="closeBatchModal()" class="p-2 rounded-lg hover:bg-zinc-800 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5 text-zinc-400"></i>
+                </button>
+            </div>
+            
+            <div id="batchCollectStatus" class="mb-6">
+                <div class="flex items-center justify-between text-sm mb-3">
+                    <span class="text-zinc-400">采集进度</span>
+                    <span id="batchProgressText" class="text-emerald-400 font-medium">0/0</span>
+                </div>
+                <div class="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                    <div id="batchProgressBar" class="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div id="batchCollectResults" class="space-y-2 max-h-48 overflow-y-auto">
+                <!-- Results will be inserted here -->
+            </div>
+            
+            <div id="batchCollectActions" class="mt-6 flex gap-3">
+                <button id="batchCancelBtn" onclick="closeBatchModal()" class="flex-1 px-4 py-2.5 rounded-xl bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors border border-zinc-700">
+                    取消
+                </button>
+                <button id="batchRefreshBtn" onclick="refreshAfterBatch()" class="hidden flex-1 px-4 py-2.5 rounded-xl bg-emerald-500 text-white font-medium hover:bg-emerald-600 transition-colors">
+                    <i data-lucide="refresh-cw" class="w-4 h-4 inline mr-2"></i>
+                    刷新页面
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% if leads %}
@@ -168,5 +217,214 @@
 
 <script>
     lucide.createIcons();
+    
+    // 页面加载时检查未采集线索数量
+    document.addEventListener('DOMContentLoaded', function() {
+        checkUncollectedLeads();
+    });
+    
+    // 检查未采集线索数量
+    async function checkUncollectedLeads() {
+        try {
+            const response = await fetch('/api/leads/uncollected');
+            const data = await response.json();
+            
+            if (data.status === 'success' && data.count > 0) {
+                const countBadge = document.getElementById('uncollectedCount');
+                countBadge.textContent = data.count;
+                countBadge.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('检查未采集线索失败:', error);
+        }
+    }
+    
+    // 开始批量采集
+    async function startBatchCollect() {
+        // 获取未采集线索
+        let uncollectedLeads = [];
+        try {
+            const response = await fetch('/api/leads/uncollected');
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                uncollectedLeads = data.data;
+            }
+        } catch (error) {
+            console.error('获取未采集线索失败:', error);
+        }
+        
+        if (uncollectedLeads.length === 0) {
+            alert('所有线索已完成数据采集，无需批量采集');
+            return;
+        }
+        
+        // 显示确认对话框
+        const confirmMsg = `发现 ${uncollectedLeads.length} 个未采集的线索，是否开始批量采集？\n\n注意：采集过程可能需要一些时间，请耐心等待。`;
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+        
+        // 显示进度弹窗
+        showBatchModal(uncollectedLeads.length);
+        
+        // 开始批量采集
+        await executeBatchCollect(uncollectedLeads);
+    }
+    
+    // 显示批量采集弹窗
+    function showBatchModal(total) {
+        const modal = document.getElementById('batchCollectModal');
+        const progressText = document.getElementById('batchProgressText');
+        const progressBar = document.getElementById('batchProgressBar');
+        const resultsDiv = document.getElementById('batchCollectResults');
+        const cancelBtn = document.getElementById('batchCancelBtn');
+        const refreshBtn = document.getElementById('batchRefreshBtn');
+        
+        // 重置状态
+        progressText.textContent = `0/${total}`;
+        progressBar.style.width = '0%';
+        resultsDiv.innerHTML = '';
+        cancelBtn.classList.remove('hidden');
+        refreshBtn.classList.add('hidden');
+        
+        modal.classList.remove('hidden');
+        lucide.createIcons();
+    }
+    
+    // 关闭批量采集弹窗
+    function closeBatchModal() {
+        const modal = document.getElementById('batchCollectModal');
+        modal.classList.add('hidden');
+    }
+    
+    // 更新进度
+    function updateProgress(current, total) {
+        const progressText = document.getElementById('batchProgressText');
+        const progressBar = document.getElementById('batchProgressBar');
+        
+        progressText.textContent = `${current}/${total}`;
+        progressBar.style.width = `${(current / total) * 100}%`;
+    }
+    
+    // 添加结果项
+    function addResultItem(name, status, message) {
+        const resultsDiv = document.getElementById('batchCollectResults');
+        
+        const item = document.createElement('div');
+        item.className = 'flex items-center gap-3 p-3 rounded-lg bg-zinc-900/50 border border-zinc-800';
+        
+        let iconHtml = '';
+        let statusClass = '';
+        
+        if (status === 'success') {
+            iconHtml = '<i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>';
+            statusClass = 'text-emerald-400';
+        } else if (status === 'skipped') {
+            iconHtml = '<i data-lucide="skip-forward" class="w-4 h-4 text-amber-400"></i>';
+            statusClass = 'text-amber-400';
+        } else {
+            iconHtml = '<i data-lucide="x-circle" class="w-4 h-4 text-rose-400"></i>';
+            statusClass = 'text-rose-400';
+        }
+        
+        item.innerHTML = `
+            ${iconHtml}
+            <div class="flex-1 min-w-0">
+                <div class="text-sm text-zinc-200 truncate">${name}</div>
+                <div class="text-xs ${statusClass}">${message}</div>
+            </div>
+        `;
+        
+        resultsDiv.appendChild(item);
+        resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        lucide.createIcons();
+    }
+    
+    // 执行批量采集
+    async function executeBatchCollect(leads) {
+        const total = leads.length;
+        const channelUrls = leads.map(l => l.channel_url);
+        
+        try {
+            const response = await fetch('/api/batch_collect', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ channel_urls: channelUrls })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'error') {
+                alert(`批量采集失败: ${data.message}`);
+                closeBatchModal();
+                return;
+            }
+            
+            const results = data.data;
+            let processed = 0;
+            
+            // 处理成功项
+            results.success.forEach(item => {
+                processed++;
+                updateProgress(processed, total);
+                addResultItem(
+                    item.url.split('/').pop() || item.url,
+                    'success',
+                    `采集成功 (${item.confidence || 'unknown'} 置信度)`
+                );
+            });
+            
+            // 处理跳过项
+            results.skipped.forEach(item => {
+                processed++;
+                updateProgress(processed, total);
+                addResultItem(
+                    item.url.split('/').pop() || item.url,
+                    'skipped',
+                    '已采集，跳过'
+                );
+            });
+            
+            // 处理失败项
+            results.failed.forEach(item => {
+                processed++;
+                updateProgress(processed, total);
+                addResultItem(
+                    item.url.split('/').pop() || item.url,
+                    'failed',
+                    `失败: ${item.error || 'Unknown error'}`
+                );
+            });
+            
+            // 显示完成状态
+            const cancelBtn = document.getElementById('batchCancelBtn');
+            const refreshBtn = document.getElementById('batchRefreshBtn');
+            cancelBtn.classList.add('hidden');
+            refreshBtn.classList.remove('hidden');
+            
+            // 更新徽章
+            const countBadge = document.getElementById('uncollectedCount');
+            const remaining = results.failed.length;
+            if (remaining > 0) {
+                countBadge.textContent = remaining;
+                countBadge.classList.remove('hidden');
+            } else {
+                countBadge.classList.add('hidden');
+            }
+            
+        } catch (error) {
+            console.error('批量采集请求失败:', error);
+            alert('批量采集请求失败，请检查网络连接');
+            closeBatchModal();
+        }
+    }
+    
+    // 批量采集完成后刷新页面
+    function refreshAfterBatch() {
+        window.location.reload();
+    }
 </script>
 {% endblock %}

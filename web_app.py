@@ -1106,6 +1106,99 @@ def api_stats():
     return jsonify({"status": "success", "data": stats})
 
 
+@app.route("/api/batch_collect", methods=["POST"])
+def api_batch_collect():
+    """
+    API: 批量数据采集
+    接收线索URL列表，异步执行数据采集
+    """
+    data = request.get_json() or {}
+    channel_urls = data.get("channel_urls", [])
+    
+    if not channel_urls:
+        return jsonify({"status": "error", "message": "未提供线索URL"})
+    
+    if not youtube_api or not youtube_api.is_available():
+        return jsonify({"status": "error", "message": "YouTube API未配置"})
+    
+    results = {
+        "success": [],
+        "failed": [],
+        "skipped": []
+    }
+    
+    def collect_single(channel_url):
+        """采集单个线索"""
+        ctx = active_leads.get(channel_url)
+        if not ctx:
+            # 服务重启后内存丢失，自动重建线索
+            ctx = orchestrator.create_lead(channel_url, "")
+            active_leads[channel_url] = ctx
+        
+        # 检查是否已采集（有creator_profile且置信度不为low）
+        if ctx.creator_profile and ctx.data_confidence != "low":
+            return {"status": "skipped", "url": channel_url, "reason": "already_collected"}
+        
+        try:
+            agent = DataCollectionAgent(config.youtube_api.api_key)
+            result = agent.execute(ctx, video_count=30)
+            
+            if result["status"] == "success":
+                return {"status": "success", "url": channel_url, "confidence": result.get("data_confidence")}
+            else:
+                return {"status": "failed", "url": channel_url, "error": result.get("message", "Unknown error")}
+        except Exception as e:
+            return {"status": "failed", "url": channel_url, "error": str(e)}
+    
+    # 串行执行采集（避免API限流）
+    for url in channel_urls:
+        result = collect_single(url)
+        if result["status"] == "success":
+            results["success"].append(result)
+        elif result["status"] == "skipped":
+            results["skipped"].append(result)
+        else:
+            results["failed"].append(result)
+    
+    return jsonify({
+        "status": "success",
+        "data": results,
+        "summary": {
+            "total": len(channel_urls),
+            "success": len(results["success"]),
+            "failed": len(results["failed"]),
+            "skipped": len(results["skipped"])
+        }
+    })
+
+
+@app.route("/api/leads/uncollected")
+def api_uncollected_leads():
+    """
+    API: 获取未采集的线索列表
+    用于前端识别需要批量采集的线索
+    """
+    uncollected = []
+    
+    for url, ctx in active_leads.items():
+        # 判断标准：没有creator_profile 或 data_confidence为low
+        is_uncollected = not ctx.creator_profile or ctx.data_confidence == "low"
+        
+        if is_uncollected:
+            uncollected.append({
+                "channel_url": url,
+                "creator_name": ctx.creator_name,
+                "current_stage": ctx.current_stage.value,
+                "data_confidence": ctx.data_confidence
+            })
+    
+    return jsonify({
+        "status": "success",
+        "data": uncollected,
+        "count": len(uncollected)
+    })
+
+
 @app.route("/email-tools")
 def email_tools():
     """邮件工具页面 - 邮件话术模板库"""

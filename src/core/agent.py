@@ -310,15 +310,26 @@ class DataCollectionAgent(BaseAgent):
     def _extract_about_description(self, data: Dict) -> str:
         """从JSON数据中提取About描述"""
         try:
-            # 导航到About描述
+            # 方法1: 从metadata.channelMetadataRenderer.description获取（最可靠）
+            metadata = data.get("metadata", {})
+            channel_metadata = metadata.get("channelMetadataRenderer", {})
+            description = channel_metadata.get("description", "")
+            if description:
+                return description
+            
+            # 方法2: 从tabs中查找About标签
             contents = data.get("contents", {})
             two_column = contents.get("twoColumnBrowseResultsRenderer", {})
             tabs = two_column.get("tabs", [])
             
             for tab in tabs:
                 tab_renderer = tab.get("tabRenderer", {})
-                if tab_renderer.get("title") == "About":
+                tab_title = tab_renderer.get("title", "")
+                # YouTube About页面的title可能是"About"或空字符串
+                if tab_title == "About" or tab_title == "":
                     content = tab_renderer.get("content", {})
+                    if not content:
+                        continue
                     section_list = content.get("sectionListRenderer", {})
                     sections = section_list.get("contents", [])
                     
