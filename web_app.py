@@ -181,12 +181,29 @@ def leads():
             "url": ctx.channel_url
         })
         
+        # 需要过滤的无用链接域名
+        useless_domains = [
+            'developers.google.com',
+            'support.google.com',
+            'policies.google.com',
+            'youtube.com/account',
+            'youtube.com/t/',
+            'youtube.com/howyoutubeworks',
+            'creatoracademy.youtube.com',
+            'www.youtube.com/account',
+            'www.youtube.com/t/',
+        ]
+        
         # 优先使用About页面的链接
         about_links = profile.get('about_links', [])
-        for link in about_links[:4]:  # 最多显示4个About链接
+        for link in about_links[:6]:  # 最多处理6个About链接
             link_type = link.get('type', 'website')
             link_url = link.get('url', '')
             link_title = link.get('title', '')
+            
+            # 跳过无用链接
+            if any(domain in link_url.lower() for domain in useless_domains):
+                continue
             
             # 根据类型设置标签
             if link_type == 'twitter':
@@ -210,6 +227,10 @@ def leads():
                 "label": label,
                 "url": link_url
             })
+            
+            # 最多显示4个有效链接
+            if len(social_links) >= 5:
+                break
         
         # 从contact_candidates补充其他社交链接
         for contact in ctx.contact_candidates:
@@ -280,6 +301,15 @@ def leads():
     return render_template("leads.html", leads=leads_list, stages=PipelineStage)
 
 
+def _normalize_channel_url(url: str) -> str:
+    """规范化频道URL：去除末尾斜杠和多余参数"""
+    url = url.strip().rstrip("/")
+    # 去除URL参数
+    if "?" in url:
+        url = url.split("?")[0]
+    return url
+
+
 @app.route("/leads/new", methods=["GET", "POST"])
 def new_lead():
     """创建新线索"""
@@ -295,15 +325,40 @@ def new_lead():
             flash("请输入有效的YouTube频道URL", "error")
             return redirect(url_for("new_lead"))
         
+        # 规范化URL
+        channel_url = _normalize_channel_url(channel_url)
+        
+        # 去重：如果已存在该线索，直接跳转到详情页
+        if channel_url in active_leads:
+            flash(f"线索已存在: {active_leads[channel_url].creator_name or channel_url}", "info")
+            return redirect(url_for("lead_detail", channel_url=channel_url))
+        
         # 创建线索
         ctx = orchestrator.create_lead(channel_url, creator_name)
         active_leads[channel_url] = ctx
         
         flash(f"线索已创建: {ctx.creator_name}", "success")
         
-        # 如果配置了API，自动执行数据采集
+        # 如果配置了API，直接执行数据采集（而不是重定向，因为 collect_data 是 POST 路由）
         if youtube_api and youtube_api.is_available():
-            return redirect(url_for("collect_data", channel_url=channel_url))
+            agent = DataCollectionAgent(config.youtube_api.api_key)
+            result = agent.execute(ctx, video_count=30)
+            
+            if result["status"] == "success":
+                # 采集完成后，检查 creator_profile 里的 channel_url 是否与当前 key 不同
+                profile = ctx.creator_profile or {}
+                canonical_url = profile.get("channel_url", "")
+                if canonical_url and canonical_url != channel_url:
+                    # 将旧 key 替换为规范化的 channel_url
+                    active_leads[canonical_url] = ctx
+                    if channel_url in active_leads:
+                        del active_leads[channel_url]
+                    flash(f"数据采集完成: {result.get('data_confidence')} 置信度", "success")
+                    return redirect(url_for("lead_detail", channel_url=canonical_url))
+                
+                flash(f"数据采集完成: {result.get('data_confidence')} 置信度", "success")
+            else:
+                flash(f"数据采集失败: {result.get('message')}", "error")
         
         return redirect(url_for("lead_detail", channel_url=channel_url))
     
@@ -364,6 +419,30 @@ def collect_data(channel_url):
     result = agent.execute(ctx, video_count=30)
     
     if result["status"] == "success":
+        # 采集完成后，检查 creator_profile 里的 channel_url 是否与当前 key 不同
+        # 如果不同，说明存在重复线索，需要合并
+        profile = ctx.creator_profile or {}
+        canonical_url = profile.get("channel_url", "")
+        if canonical_url and canonical_url != channel_url:
+            # 将旧 key 替换为规范化的 channel_url
+            active_leads[canonical_url] = ctx
+            if channel_url in active_leads and channel_url != canonical_url:
+                del active_leads[channel_url]
+            # 重定向到新的规范化 URL
+            flash(f"数据采集完成: {result.get('data_confidence')} 置信度", "success")
+            return redirect(url_for("lead_detail", channel_url=canonical_url))
+        
+        # 清理 active_leads 中其他与本频道 channel_id 相同的重复线索
+        channel_id = profile.get("channel_id", "")
+        if channel_id:
+            duplicate_keys = [
+                k for k, v in list(active_leads.items())
+                if k != channel_url
+                and (v.creator_profile or {}).get("channel_id") == channel_id
+            ]
+            for dup_key in duplicate_keys:
+                del active_leads[dup_key]
+        
         flash(f"数据采集完成: {result.get('data_confidence')} 置信度", "success")
     else:
         flash(f"数据采集失败: {result.get('message')}", "error")
@@ -1082,6 +1161,75 @@ def api_leads():
         })
     
     return jsonify({"status": "success", "data": leads_list})
+
+
+@app.route("/api/leads/deduplicate", methods=["POST"])
+def api_deduplicate_leads():
+    """API: 清理重复线索（保留有数据的，删除空线索和错误URL）"""
+    removed = []
+    
+    # 1. 首先删除 URL 明显错误的线索（如包含 /collect 后缀）
+    for url in list(active_leads.keys()):
+        if url.endswith("/collect") or "/collect/" in url:
+            del active_leads[url]
+            removed.append({"url": url, "reason": "invalid_url_with_collect"})
+    
+    # 2. 按 channel_id 分组，找出重复
+    channel_id_map = {}
+    for url, ctx in list(active_leads.items()):
+        channel_id = (ctx.creator_profile or {}).get("channel_id", "")
+        if channel_id:
+            if channel_id not in channel_id_map:
+                channel_id_map[channel_id] = []
+            channel_id_map[channel_id].append(url)
+    
+    # 对每组重复，保留有 creator_profile 的，删除空的
+    for channel_id, urls in channel_id_map.items():
+        if len(urls) > 1:
+            # 按有无数据排序：有数据的排前面
+            urls_with_data = [u for u in urls if active_leads[u].creator_profile]
+            urls_without_data = [u for u in urls if not active_leads[u].creator_profile]
+            
+            # 删除无数据的重复项
+            for url in urls_without_data:
+                del active_leads[url]
+                removed.append({"url": url, "reason": "no_data_duplicate"})
+            
+            # 如果都有数据，保留 creator_profile 数据最完整的（订阅数不为0的）
+            if len(urls_with_data) > 1:
+                urls_with_data.sort(
+                    key=lambda u: (active_leads[u].creator_profile or {}).get("subscriber_count", 0),
+                    reverse=True
+                )
+                for url in urls_with_data[1:]:
+                    del active_leads[url]
+                    removed.append({"url": url, "reason": "duplicate_with_less_data"})
+    
+    # 3. 按 URL（忽略大小写）分组，找出大小写不同但指向同一频道的重复
+    url_lower_map = {}
+    for url, ctx in list(active_leads.items()):
+        url_key = url.lower()
+        if url_key not in url_lower_map:
+            url_lower_map[url_key] = []
+        url_lower_map[url_key].append(url)
+    
+    for url_key, urls in url_lower_map.items():
+        if len(urls) > 1:
+            # 优先保留有数据的
+            urls_sorted = sorted(urls, key=lambda u: (
+                1 if active_leads[u].creator_profile else 0,
+                (active_leads[u].creator_profile or {}).get("subscriber_count", 0)
+            ), reverse=True)
+            
+            for url in urls_sorted[1:]:
+                del active_leads[url]
+                removed.append({"url": url, "reason": "case_insensitive_duplicate"})
+    
+    return jsonify({
+        "status": "success",
+        "removed_count": len(removed),
+        "removed": removed
+    })
 
 
 @app.route("/api/stats")

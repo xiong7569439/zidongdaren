@@ -32,6 +32,10 @@
         <p class="text-zinc-400 text-sm mt-1">管理你的 YouTube 网红合作线索</p>
     </div>
     <div class="flex items-center gap-3">
+        <button id="exportBtn" onclick="exportLeads()" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition-all">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            导出Excel
+        </button>
         <button id="batchCollectBtn" onclick="startBatchCollect()" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all">
             <i data-lucide="database" class="w-4 h-4"></i>
             一键批量采集
@@ -218,10 +222,24 @@
 <script>
     lucide.createIcons();
     
-    // 页面加载时检查未采集线索数量
+    // 页面加载时自动去重 + 检查未采集线索数量
     document.addEventListener('DOMContentLoaded', function() {
-        checkUncollectedLeads();
+        deduplicateLeads().then(() => checkUncollectedLeads());
     });
+    
+    // 自动去重重复线索
+    async function deduplicateLeads() {
+        try {
+            const response = await fetch('/api/leads/deduplicate', { method: 'POST' });
+            const data = await response.json();
+            if (data.status === 'success' && data.removed_count > 0) {
+                // 有重复线索被删除，刷新页面
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error('去重失败:', error);
+        }
+    }
     
     // 检查未采集线索数量
     async function checkUncollectedLeads() {
@@ -425,6 +443,94 @@
     // 批量采集完成后刷新页面
     function refreshAfterBatch() {
         window.location.reload();
+    }
+    
+    // 导出线索数据为Excel/CSV
+    function exportLeads() {
+        // 获取所有线索数据（从页面中提取）
+        const leads = [];
+        
+        // 从页面卡片中提取数据
+        document.querySelectorAll('.kol-card').forEach(card => {
+            const name = card.querySelector('h3')?.textContent?.trim() || '';
+            const handle = card.querySelector('p.text-zinc-500')?.textContent?.trim() || '';
+            
+            // 提取统计数据
+            const statValues = card.querySelectorAll('.grid.grid-cols-3 .text-lg');
+            const subscriber = statValues[0]?.textContent?.trim() || '-';
+            const videoCount = statValues[1]?.textContent?.trim() || '-';
+            const avgViews = statValues[2]?.textContent?.trim() || '-';
+            
+            // 提取游戏类型（使用转义的选择器）
+            const gameTags = Array.from(card.querySelectorAll('[class*="bg-indigo-500"]')).map(el => el.textContent.trim()).filter(t => t && !t.includes('YouTube')).join(', ');
+            
+            // 提取国家
+            const countryEl = card.querySelector('.bg-zinc-800.text-zinc-400');
+            const country = countryEl?.textContent?.trim() || '';
+            
+            // 提取状态
+            const stageText = card.querySelector('.text-xs.text-zinc-500.flex')?.textContent?.trim() || '';
+            
+            // 提取社交链接
+            const socialLinks = Array.from(card.querySelectorAll('.social-link')).map(link => {
+                return `${link.textContent.trim()}: ${link.getAttribute('href') || link.getAttribute('data-url') || ''}`;
+            }).join('; ');
+            
+            // 提取邮箱
+            const emailLinks = Array.from(card.querySelectorAll('a[href^="mailto:"]')).map(a => a.textContent.trim()).join(', ');
+            
+            leads.push({
+                '创作者名称': name,
+                '频道标识': handle,
+                '订阅数': subscriber,
+                '视频数': videoCount,
+                '平均观看量': avgViews,
+                '国家/地区': country,
+                '游戏类型': gameTags,
+                '合作状态': stageText,
+                '社交链接': socialLinks,
+                '邮箱地址': emailLinks
+            });
+        });
+        
+        if (leads.length === 0) {
+            alert('暂无线索可导出');
+            return;
+        }
+        
+        // 创建CSV内容
+        const headers = Object.keys(leads[0]);
+        const csvContent = [
+            headers.join(','),
+            ...leads.map(lead => 
+                headers.map(header => {
+                    let value = lead[header] || '';
+                    // 处理包含逗号或换行符的值
+                    if (value.includes(',') || value.includes('\n') || value.includes('"')) {
+                        value = '"' + value.replace(/"/g, '""') + '"';
+                    }
+                    return value;
+                }).join(',')
+            )
+        ].join('\n');
+        
+        // 添加BOM以支持中文
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+        
+        // 创建下载链接
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().slice(0, 10);
+        link.href = URL.createObjectURL(blob);
+        link.download = `KOL线索_${timestamp}.csv`;
+        
+        // 触发下载
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // 释放URL对象
+        URL.revokeObjectURL(link.href);
     }
 </script>
 {% endblock %}
